@@ -1,1 +1,8 @@
-- factor and power rules break if there's no whitespace between digits and the operator
+[Parser]
+
+x add an option for specific token values (ex: @KEYWORD:let)
+x add on option to skip tokens ("&" at the end of the token name)
+x add an option for variable binary operator length ("*" at the end of a rule variation)
+x add an option for variable children count node (block nodes)
+- add an option for a rule to ignore new lines
+- add error handling

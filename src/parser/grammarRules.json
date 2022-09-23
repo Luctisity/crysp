@@ -1,0 +1,143 @@
+{
+
+    "block": [
+        ["$command", "$blockSep", "**"],
+        ["$command"]
+    ],
+
+    "command": [
+        ["$if"],
+        ["$switch"],
+        ["$while"],
+        ["$trycatch"],
+        ["$expr"],
+        ["$return"],
+        ["$break"],
+        ["$continue"],
+        ["$delete"],
+        ["$throw"]
+    ],
+
+    "if": [
+        ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&", "$else"],
+        ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
+        ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "$command", "$else"],
+        ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "$command"]
+    ],
+    "else": [
+        ["@KEYWORD:else", "@OCURLY&", "$block", "@CCURLY&"],
+        ["@KEYWORD:else", "$command"]
+    ],
+
+    "switch": [
+        ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$case", "$default", "@CCURLY&"],
+        ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$case", "@CCURLY&"]
+    ],
+    "case": [
+        ["@KEYWORD:case", "$expr", "@COLON&", "$block", "**"]
+    ],
+    "default": [
+        ["@KEYWORD:default", "@COLON&", "$block"]
+    ],
+
+    "while": [
+        ["@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&",  "@OCURLY&", "$block", "@CCURLY&"],
+        ["@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&", "$command"]
+    ],
+
+    "trycatch": [
+        ["@KEYWORD:try", "@OCURLY&", "$block", "@CCURLY&", "@KEYWORD:catch", "@OPAREN&", "@IDENTIFIER", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
+        ["@KEYWORD:try", "@OCURLY&", "$block", "@CCURLY&", "@KEYWORD:catch", "@OCURLY&", "$block", "@CCURLY&"]
+    ],
+
+    "expr": [
+        ["$compare", "$and", "$compare", "*"],
+        ["$compare", "$or", "$compare", "*"],
+        ["$compare", "$not", "$compare", "*"],
+        ["$compare"]
+    ],
+
+    "compare": [
+        ["$arithm", "$equals", "$arithm", "*"],
+        ["$arithm", "@NOTEQ", "$arithm", "*"],
+        ["$arithm", "@GREATER", "$arithm", "*"],
+        ["$arithm", "@LESS", "$arithm", "*"],
+        ["$arithm", "@GREATEREQ", "$arithm", "*"],
+        ["$arithm", "@LESSEQ", "$arithm", "*"],
+        ["$arithm"]
+    ],
+
+    "arithm": [
+        ["$term", "@ADD", "$term", "*"],
+        ["$term", "@SUB", "$term", "*"],
+        ["$term"]
+    ],
+    "term": [
+        ["$factor", "@MUL", "$factor", "*"],
+        ["$factor", "@DIV", "$factor", "*"],
+        ["$factor", "@MOD", "$factor", "*"],
+        ["$factor"]
+    ],
+    "factor": [
+        ["@ADD", "$factor"],
+        ["@SUB", "$factor"],
+        ["$not", "$factor"],
+        ["$power"]
+    ],
+    "power": [
+        ["$atom", "@POW", "$factor", "*"],
+        ["$atom"]
+    ],
+
+    "return": [
+        ["@KEYWORD:return", "$expr"],
+        ["@KEYWORD:return"]
+    ],
+    "break": [
+        ["@KEYWORD:break"]
+    ],
+    "continue": [
+        ["@KEYWORD:continue"]
+    ],
+    "delete": [
+        ["@KEYWORD:delete", "$expr"]
+    ],
+    "throw": [
+        ["@KEYWORD:throw", "$expr"]
+    ],
+
+    "atom": [
+        ["@FLOAT"],
+        ["@INT"],
+        ["@STRING"],
+        ["@KEYWORD:true"],
+        ["@KEYWORD:false"],
+        ["@KEYWORD:null"],
+        ["@IDENTIFIER"],
+        ["@OPAREN&", "$expr", "@CPAREN&"]
+    ],
+
+    "and": [
+        ["@AND"],
+        ["@KEYWORD:and"]
+    ],
+    "or": [
+        ["@OR"],
+        ["@KEYWORD:or"]
+    ],
+    "not": [
+        ["@NOT"],
+        ["@KEYWORD:not"]
+    ],
+    "equals": [
+        ["@EQUALS"],
+        ["@KEYWORD:is"]
+    ],
+
+
+    "blockSep": [
+        ["@BLOCKSEP"],
+        ["@NEWL"]
+    ]
+
+}
