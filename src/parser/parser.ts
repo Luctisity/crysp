@@ -94,10 +94,7 @@ export default class Parser {
                 finished = true;
 
                 // if no variation matches in the most outer role, throw error
-                if (rec == 0) {
-                    this.next();
-                    error = true;
-                }
+                if (rec == 0) error = true;
 
             // if found a special "**" instruction,
             // begin a block and reset both the step and the variation
@@ -215,6 +212,7 @@ export default class Parser {
 
         //if (rec > -1 || rec == -99999) console.log(this.indent(rec), 'exited rule', name, nodes);
         if (nodes.length || (error && !this.current.token)) this.prev();
+        if (error && this.current.token?.type == TOKEN_NEWL) this.next();
 
         return error
             ? ruleAdapter.getSyntaxError(this.current.token!)
