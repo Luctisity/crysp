@@ -1,4 +1,3 @@
-import { TOKEN_FLOAT, TOKEN_INT, TOKEN_KEYWORD } from "../lexer/constants";
 import { 
     AtomNode, BaseNode, BinaryOpNode, BlockNode, BreakNode, 
     CasesNode, ContinueNode, DefaultCaseNode, DeleteNode, DoWhileNode,
@@ -54,7 +53,6 @@ export default class Interpreter {
         else
             builtin = new NullBuiltin();
 
-        console.log(node.token);
         return builtin.setPos(node.range);
     }
 
