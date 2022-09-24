@@ -3,16 +3,11 @@ import Lexer from './src/lexer/lexer';
 import Parser from './src/parser/parser';
 
 const text = `
-try { 
-    69 + 
-    42; 
-    420;
-
-    delete 54; 
-} catch { 
-    42 + 42; 
-}
-return 5 == 3 * 2;`;
+do {
+    "Hello"; "Hi";
+    true * 3
+} while (6 == 7);
+return 6;`;
 console.log(text);
 
 function run () {

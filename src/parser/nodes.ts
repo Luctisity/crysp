@@ -215,6 +215,25 @@ export class WhileNode extends BaseNode {
 
 }
 
+export class DoWhileNode extends BaseNode {
+
+    type = 'dowhile';
+
+    cond:  BaseNode;
+    block: BaseNode;
+
+    constructor (_do: Token, block: BaseNode, _while: Token, cond: BaseNode) {
+        super();
+        this.cond  = cond;
+        this.block = block;
+    }
+
+    toString () {
+        return `do ${this.block} while ${this.cond}`;
+    }
+
+}
+
 export class TryCatchNode extends BaseNode {
 
     type = 'trycatch';
@@ -331,7 +350,9 @@ export const NODE_MAP = {
     '@KEYWORD:case,%,%':   CasesNode,       // switch cases
     '@KEYWORD:default,%':  DefaultCaseNode, // switch default case
 
-    '@KEYWORD:while,%':  WhileNode,    // while
+    '@KEYWORD:while,%':               WhileNode,    // while
+    '@KEYWORD:do,%,@KEYWORD:while,%': DoWhileNode,  // do while
+    
     '@KEYWORD:return':   ReturnNode,   // return command
     '@KEYWORD:break':    BreakNode,    // break command
     '@KEYWORD:continue': ContinueNode, // continue command
