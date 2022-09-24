@@ -6,15 +6,17 @@ const text = `
 switch (5) {
     case 4:
         69
-        a
     case 5:
         420
+    case 6:
     case 8:
         69;
         42;
     default:
         69420;
-}`;
+}
+
+4200000.1;`;
 console.log(text);
 
 function run () {

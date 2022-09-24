@@ -2,7 +2,7 @@ import { SyntaxErrorException } from "../classes/exception";
 import { ATOMS, SYMBOLS, TOKEN_IDENTIFIER, TOKEN_KEYWORD } from "../lexer/constants";
 import Token from "../lexer/token";
 import { ERROR_UNEXP_TOKEN, h } from "../strings";
-import { BaseNode, BlockNode, NODE_INPUT_NODES, NODE_MAP } from "./nodes";
+import { BaseNode, BlockNode, CasesNode, NODE_INPUT_NODES, NODE_MAP } from "./nodes";
 
 export type Rule = string[][];
 
@@ -101,7 +101,13 @@ export default class ParserRuleAdapter {
     doesBlockContainsError (targetNode: any) {
         let error = false;
 
-        if (targetNode instanceof BlockNode && targetNode.nodes.filter(f => f instanceof Token).length) error = true;
+        // if a block contains raw tokens (not wrapped inside a node), error
+        if (targetNode instanceof BlockNode && targetNode.nodes.filter(f => f instanceof Token).length) 
+            error = true;
+        // if a cases list nodes ends with a case keyword, error
+        else if (targetNode instanceof CasesNode && targetNode.nodes[targetNode.nodes.length-1] instanceof Token) 
+            error = true;
+        // if one of the fields of the node is a token and it's not supposed to be, error
         else if (targetNode) {
             NODE_INPUT_NODES.forEach(nodeName => {
                 if (error) return;

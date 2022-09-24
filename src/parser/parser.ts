@@ -47,7 +47,7 @@ export default class Parser {
 
     protected rule = (name: string, rec: number = 0): RuleReturn => {
         // setup
-        if (name == 'expr') rec = -99999;
+
         const ruleData: Rule = (grammarRules as any)[name];
         const ruleAdapter = new ParserRuleAdapter();
         if (!ruleData) return [];
@@ -123,7 +123,7 @@ export default class Parser {
 
 
         // main loop
-        if (rec > -1 || rec == -99999) console.log(this.indent(rec), 'entered rule', name);
+        //if (rec > -1 || rec == -99999) console.log(this.indent(rec), 'entered rule', name);
         while (!finished && this.current.token) {
             // get the #step from #variation from the rule (the current item)
             const item = ruleData[variation][step];
@@ -197,7 +197,7 @@ export default class Parser {
 
         // back up by one after finishing the rule and return the nodes (unless no nodes found)
 
-        if (rec > -1 || rec == -99999) console.log(this.indent(rec), 'exited rule', name, nodes);
+        //if (rec > -1 || rec == -99999) console.log(this.indent(rec), 'exited rule', name, nodes);
         if (nodes.length || (error && !this.current.token)) this.prev();
 
         return error

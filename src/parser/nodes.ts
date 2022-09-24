@@ -151,8 +151,8 @@ export class SwitchNode extends BaseNode {
 }
 
 export type CasesNodeCase = {
-    cond:  BaseNode,
-    block: BaseNode
+    cond:   BaseNode,
+    block?: BaseNode
 }
 
 export class DefaultCaseNode extends BaseNode {
@@ -175,10 +175,13 @@ export class CasesNode extends BaseNode {
 
     type = 'cases';
     cases: CasesNodeCase[] = [];
+    nodes: any[];
 
     constructor (...nodes: BaseNode[]) {
         super();
 
+        this.nodes = nodes;
+        
         let type = 0;
         let lastItem: any = {};
         nodes.forEach((node: any) => {
@@ -199,7 +202,7 @@ export class CasesNode extends BaseNode {
     }
 
     toString () {
-        return this.cases.map(m => `case ${m.cond}: ${m.block}`).join('\n');
+        return this.cases.map(m => `case ${m.cond}: ${m.block || ''}`).join('\n');
     }
 
 }
