@@ -56,6 +56,6 @@ export class IllegalCharException extends Exception {
 
 export class SyntaxErrorException extends Exception {
 
-    type = 'SyntaxErrorException';
+    type = 'SyntaxError';
 
 }
