@@ -2,7 +2,17 @@ import { Exception } from './src/classes/exception';
 import Lexer from './src/lexer/lexer';
 import Parser from './src/parser/parser';
 
-const text = `try { 69; 420; delete 54; } catch { 42 + 42; }; return 5 == 3 * 2;`;
+const text = `
+try { 
+    69 + 
+    42; 
+    420;
+
+    delete 54; 
+} catch { 
+    42 + 42; 
+}
+return 5 == 3 * 2;`;
 console.log(text);
 
 function run () {

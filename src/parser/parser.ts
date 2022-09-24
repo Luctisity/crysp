@@ -1,4 +1,5 @@
 import { SyntaxErrorException } from "../classes/exception";
+import { TOKEN_BLOCKSEP, TOKEN_NEWL } from "../lexer/constants";
 import Token from "../lexer/token";
 import { ERROR_UNEXP_TOKEN, h } from "../strings";
 import grammarRules from "./grammarRules.json";
@@ -40,7 +41,7 @@ export default class Parser {
 
     protected rule = (name: string, rec: number = 0) => {
         // setup
-
+        
         const ruleData: Rule = (grammarRules as any)[name];
         const ruleAdapter = new ParserRuleAdapter();
         if (!ruleData) return [];
@@ -52,6 +53,22 @@ export default class Parser {
         let finished = false;
         let isBlock  = false;
         if (name == 'case') isBlock = true;
+
+        let ignoreNewLines = true;
+        // if this rule contains "@NEWL" inside one of its variations
+        // this means that it doesnt ignore new lines
+        if (ruleAdapter.doesRuleListenToNewLines(ruleData)) {
+            ignoreNewLines = false;
+
+            // if the token right before the current one (skipped) is a new line
+            // push the BLOCKSEP token (automatic semicolon placement) and finish the iteration
+            this.prev();
+            if (this.current.token!.type == TOKEN_NEWL) {
+                nodes.push(new Token(TOKEN_BLOCKSEP));
+                finished = true;
+            };
+            this.next();
+        }
 
         // go to the next variation, if none left, finish
         const tryNextVariation = () => {
@@ -97,6 +114,12 @@ export default class Parser {
             // if so, push it and advance
             // if not, try next variation
             if (ruleAdapter.isToken(item)) {
+                // if this rule ignores new lines and the current token is a newline, skip
+                if (ignoreNewLines && this.current.token.type == TOKEN_NEWL) {
+                    this.next();
+                    continue;
+                }
+
                 const token = ruleAdapter.getToken(item);
                 
                 if (ruleAdapter.matchesToken(token, this.current.token)) {
@@ -144,7 +167,7 @@ export default class Parser {
 
         // back up by one after finishing the rule and return the nodes (unless no nodes found)
 
-        //if (rec > -1) console.log(this.indent(rec), 'exited rule', name, nodes);
+        //if (rec > -1 || rec == -99999) console.log(this.indent(rec), 'exited rule', name, nodes);
         if (nodes.length) this.prev();
         return nodes;
 

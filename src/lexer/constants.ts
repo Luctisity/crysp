@@ -1,5 +1,3 @@
-export const TOKEN_NEWLINE = 'NEWLINE';
-
 export const TOKEN_STRING = 'STRING';
 export const TOKEN_INT    = 'INT';
 export const TOKEN_FLOAT  = 'FLOAT';

@@ -75,7 +75,7 @@ export class BlockNode extends BaseNode {
 
     constructor (...nodes: BaseNode[]) {
         super();
-        this.nodes = nodes.filter(node => !node || node.type != 'BLOCKSEP');
+        this.nodes = nodes.filter(node => !node || !['BLOCKSEP', 'NEWL'].includes(node.type));
     }
 
     toString () {
