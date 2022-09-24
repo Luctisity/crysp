@@ -1,4 +1,5 @@
 import { Exception } from "../classes/exception";
+import { p } from "../classes/position";
 import { TOKEN_BLOCKSEP, TOKEN_NEWL } from "../lexer/constants";
 import Token from "../lexer/token";
 import grammarRules from "./grammarRules.json";
@@ -34,11 +35,15 @@ export default class Parser {
         const ruleAdapter = new ParserRuleAdapter();
 
         // if the rule returned an error, pass it on
+        let ps = this.current.token!.range!.clone().start;
+
         const block = this.rule('block');
         if (block instanceof Exception) return block;
 
+        let pe = this.current.token?.range!.clone().end;
+
         // if the resulting node contains an error, raise it
-        const node = ruleAdapter.getCorrespondingNode(block, true);
+        const node = ruleAdapter.getCorrespondingNode(block, true, p(ps, pe));
         if (ruleAdapter.doesBlockContainsError(node)) {
             this.next();
             return ruleAdapter.getSyntaxError(this.current.token!);
@@ -53,7 +58,7 @@ export default class Parser {
 
     protected rule = (name: string, rec: number = 0): RuleReturn => {
         // setup
-
+       
         const ruleData: Rule = (grammarRules as any)[name];
         const ruleAdapter = new ParserRuleAdapter();
         if (!ruleData) return [];
@@ -121,7 +126,9 @@ export default class Parser {
             // and reset the step (recursive binary operation joining)
             else if (ruleAdapter.isABinaryRepeatInstruction(ruleData, variation, step)) {
                 step = 1;
-                const targetNode = ruleAdapter.getCorrespondingNode(nodes);
+                let ps = nodes[0].range?.start;
+                let pe = nodes[nodes.length-1].range?.end;
+                const targetNode = ruleAdapter.getCorrespondingNode(nodes, false, p(ps!, pe));
                 if (targetNode) nodes = [targetNode];
             }
 
@@ -164,8 +171,12 @@ export default class Parser {
             } else if (ruleAdapter.isRule(item)) {
                 // get the recursive rule and it's corresponding node
                 // if the rule returned no result, try next variation
+                let ps = this.current.token!.range!.clone().start;
+
                 const ruleName = item.slice(1);
                 const nodeData = this.rule(ruleName, rec+1);
+
+                let pe = this.current.token?.range!.clone().end;
 
                 // if returned an exception, pass it on
                 if (nodeData instanceof Exception) return nodeData;
@@ -174,7 +185,7 @@ export default class Parser {
                     tryNextVariation();
                     continue;
                 }
-                const targetNode = ruleAdapter.getCorrespondingNode(nodeData, isBlock);
+                const targetNode = ruleAdapter.getCorrespondingNode(nodeData, isBlock, p(ps, pe));
 
                 if (ruleAdapter.doesBlockContainsError(targetNode)) {
                     this.next();

@@ -1,4 +1,5 @@
 import { SyntaxErrorException } from "../classes/exception";
+import { PositionRange } from "../classes/position";
 import { ATOMS, SYMBOLS, TOKEN_IDENTIFIER, TOKEN_KEYWORD } from "../lexer/constants";
 import Token from "../lexer/token";
 import { ERROR_UNEXP_TOKEN, h } from "../strings";
@@ -33,9 +34,9 @@ export default class ParserRuleAdapter {
         return ruleData[variation][step] == "*";
     }
 
-    getCorrespondingNode (nodes: any[], isBlock: boolean = false) {
+    getCorrespondingNode (nodes: any[], isBlock: boolean = false, range?: PositionRange) {
         // if is block, just create a new BlockNode
-        if (isBlock) return new BlockNode(...nodes);
+        if (isBlock) return new BlockNode(...nodes).setPos(range);
 
         // get the desired node from the node map based on the string representation
         let r = this.getNodeMapEntry(nodes);
@@ -43,10 +44,10 @@ export default class ParserRuleAdapter {
         // if the result is the "pass" keyword, pass the first node from the parameter, otherwise create a new node
         if (r == 'pass') {
             if (nodes.length == 1) return nodes[0];
-            else return new BlockNode(...nodes);
+            else return new BlockNode(...nodes).setPos(range);
         }
         if (r === true)  return true;
-        return r ? new r(...nodes) : null;
+        return r ? new r(...nodes).setPos(range) : null;
     }
 
     getNodeMapEntry (nodes: any[]) {
@@ -147,7 +148,7 @@ export default class ParserRuleAdapter {
     }
 
     getSyntaxError (token?: Token) {
-        if (!token) return new SyntaxErrorException(h(ERROR_UNEXP_TOKEN, 'bruh'));
+        if (!token) return new SyntaxErrorException(h(ERROR_UNEXP_TOKEN, ''));
 
         return new SyntaxErrorException(h(ERROR_UNEXP_TOKEN, this.serializeToken(token)), token.range?.clone())
     }

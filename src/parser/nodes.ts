@@ -1,12 +1,19 @@
+import { PositionRange } from "../classes/position";
 import { TOKEN_KEYWORD } from "../lexer/constants";
 import Token from "../lexer/token";
 
 export class BaseNode {
 
     type = 'base';
+    range?: PositionRange;
 
     toString () {
         return 'BaseNode';
+    }
+
+    setPos (range?: PositionRange) {
+        this.range = range;
+        return this;
     }
 
 }
@@ -354,7 +361,11 @@ export const NODE_MAP = {
     '%,@BLOCKSEP,%': BlockNode, // node + block separation token + node is a block, not a binary operator
     '@,%':   UnaryOpNode,       // unary operators
     '@KEYWORD,%':   'pass',
+    '@KEYWORD:not,%': UnaryOpNode, // unary operators
     '%,@KEYWORD,%': 'pass',
+    '%,@KEYWORD:is,%': BinaryOpNode,
+    '%,@KEYWORD:and,%': BinaryOpNode,
+    '%,@KEYWORD:or,%': BinaryOpNode,
 
     '@KEYWORD:if,%,%':   IfNode,   // if
     '@KEYWORD:else,%': ElseNode, // else

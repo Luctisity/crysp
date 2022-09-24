@@ -18,6 +18,8 @@ export type LexerCurrentState = {
     symbolStr: string
 }
 
+export type LexerResult = [Token[] | Exception, string | undefined]
+
 export default class Lexer {
 
     current: LexerCurrentState = {
@@ -37,7 +39,7 @@ export default class Lexer {
         this.next(this.text);
     }
 
-    tokenize () {
+    tokenize (): LexerResult {
         this.rewind(this.text);
 
         // a list of all commands as strings, separated
@@ -64,7 +66,7 @@ export default class Lexer {
         this.textPart = textStripped;
         this.rewind();
         let t = this.tokenizePart();
-        return t;
+        return [t, this.textPart];
     }
 
     tokenizePart = () => {
