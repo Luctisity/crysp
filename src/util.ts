@@ -1,4 +1,4 @@
-import { COMMENT_NEWLINE, COMMENT_END, COMMENT_START, KEYWORDS, NUMERIC, NUMERIC_DOT, NUMERIC_EXP, STRING, STRING_ESCAPE_CODES, SYMBOLS, WORD } from "./lexer/constants";
+import { COMMENT_END, COMMENT_START, KEYWORDS, NUMERIC, NUMERIC_DOT, NUMERIC_EXP, STRING, STRING_ESCAPE_CODES, SYMBOLS, WORD } from "./lexer/constants";
 
 export function isWhitespace (char: string) {
     return char.trim() != char;
@@ -67,6 +67,3 @@ export function isCommentEnd (text: string, pos: number, end: string) {
     return false;
 }
 
-export function isNewline (char: string) {
-    return char == COMMENT_NEWLINE;
-}

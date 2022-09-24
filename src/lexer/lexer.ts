@@ -2,12 +2,12 @@ import Token from "./token";
 import { Exception, IllegalCharException } from "../classes/exception";
 import { 
     getStringEscapeCode, hasSymbolsStartWith, isComment, isCommentEnd, isDot, 
-    isExp, isFloatNumeric, isFloatNumericExp, isKeyword, isNewline, 
+    isExp, isFloatNumeric, isFloatNumericExp, isKeyword, 
     isStringQuote, isSymbol, isWhitespace, isWord 
 } from "../util";
 import { 
     COMMENT_NEWLINE, NUMERIC_DOT, NUMERIC_EXP, SYMBOLS, TOKEN_FLOAT, 
-    TOKEN_IDENTIFIER, TOKEN_INT, TOKEN_KEYWORD, TOKEN_NEWLINE, TOKEN_STRING 
+    TOKEN_IDENTIFIER, TOKEN_INT, TOKEN_KEYWORD, TOKEN_STRING 
 } from "./constants";
 import { ERROR_NUMERIC_IDNTF, ERROR_UNCLOSED_STR, ERROR_UNEXP_CHAR, h } from "../strings";
 import Position, { p } from "../classes/position";
@@ -83,8 +83,6 @@ export default class Lexer {
 
             // whitespace
             else if (isWhitespace(char)) {
-                // newline
-                if (isNewline(char)) tokens.push(new Token(TOKEN_NEWLINE));
                 this.next();
             }
 

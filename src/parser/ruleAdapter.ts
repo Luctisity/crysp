@@ -91,4 +91,8 @@ export default class ParserRuleAdapter {
         }
     }
 
+    doesRuleListenToNewLines (rule: Rule) {
+        return rule.filter(f => f.includes("@NEWL")).length;
+    }
+
 }
