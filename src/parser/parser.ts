@@ -27,18 +27,24 @@ export default class Parser {
     }
 
     parse () {
+        // initialize current state
         this.next();
 
         // the most outer rule is block, create it and return the result node
         const ruleAdapter = new ParserRuleAdapter();
+
+        // if the rule returned an error, pass it on
         const block = this.rule('block');
         if (block instanceof Exception) return block;
+
+        // if the resulting node contains an error, raise it
         const node = ruleAdapter.getCorrespondingNode(block, true);
         if (ruleAdapter.doesBlockContainsError(node)) {
             this.next();
             return ruleAdapter.getSyntaxError(this.current.token!);
         }
 
+        // otherwise, return the node as is
         return node;
     }
 
@@ -63,6 +69,7 @@ export default class Parser {
         if (name == 'case') isBlock = true;
 
         let ignoreNewLines = true;
+
         // if this rule contains "@NEWL" inside one of its variations
         // this means that it doesnt ignore new lines
         if (ruleAdapter.doesRuleListenToNewLines(ruleData)) {
@@ -85,7 +92,7 @@ export default class Parser {
 
             // if found a special "**" instruction,
             // begin a block and reset both the step and the variation
-            else if (ruleData[variation][step] == "**") {
+            else if (ruleAdapter.isABlockRepeatInstruction(ruleData, variation, step)) {
                 step = 0;
                 variation = 0;
                 isBlock = true;
@@ -106,7 +113,7 @@ export default class Parser {
             // if found a special "*" instruction,
             // make replace nodes with [newNode(nodes)]
             // and reset the step (recursive binary operation joining)
-            else if (ruleData[variation][step] == "*") {
+            else if (ruleAdapter.isABinaryRepeatInstruction(ruleData, variation, step)) {
                 step = 1;
                 const targetNode = ruleAdapter.getCorrespondingNode(nodes);
                 if (targetNode) nodes = [targetNode];
@@ -114,7 +121,7 @@ export default class Parser {
 
             // if found a special "**" instruction,
             // begin a block and reset the step
-            else if (ruleData[variation][step] == "**") {
+            else if (ruleAdapter.isABlockRepeatInstruction(ruleData, variation, step)) {
                 step = 0;
                 isBlock = true;
                 finished = false;

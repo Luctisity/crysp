@@ -25,6 +25,14 @@ export default class ParserRuleAdapter {
         return matchType && matchValue;
     }
 
+    isABlockRepeatInstruction (ruleData: Rule, variation: number, step: number) {
+        return ruleData[variation][step] == "**";
+    }
+
+    isABinaryRepeatInstruction (ruleData: Rule, variation: number, step: number) {
+        return ruleData[variation][step] == "*";
+    }
+
     getCorrespondingNode (nodes: any[], isBlock: boolean = false) {
         // if is block, just create a new BlockNode
         if (isBlock) return new BlockNode(...nodes);
