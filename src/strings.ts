@@ -3,6 +3,8 @@ export const ERROR_NUMERIC_IDNTF = "Identifier names cannot start with a numberi
 export const ERROR_UNCLOSED_STR  = "Expected a closing string quote before the end of line";
 export const ERROR_UNEXP_TOKEN   = "Unexpected token: $";
 
+export const RTERROR_DIV_ZERO = "Division by zero";
+
 export function h (str: string, repl: string) {
     return str.replaceAll("$", repl);
 }

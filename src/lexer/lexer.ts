@@ -23,7 +23,7 @@ export type LexerResult = [Token[] | Exception, string | undefined]
 export default class Lexer {
 
     current: LexerCurrentState = {
-        pos: new Position(-1, 1, 0),
+        pos: new Position(-1, 1, -1),
         char: null,
         symbolStr: ""
     }
@@ -130,7 +130,7 @@ export default class Lexer {
 
     protected makeString = (closeSymbol: string) => {
         let s = '';
-        let ps = this.current.pos.clone().next();
+        let ps = this.current.pos.clone();
         this.next();
 
         // loop through all the character until a closing quote is found or the end is reached
@@ -163,7 +163,7 @@ export default class Lexer {
         this.symbol = this.makeSymbol();
 
         // otherwise, return the result string as a token
-        let pe = this.current.pos.clone().next();
+        let pe = this.current.pos.clone();
         return new Token(TOKEN_STRING, s, p(ps, pe, this.textPart));
     }
 
@@ -173,7 +173,7 @@ export default class Lexer {
         let exps = 0;
         let dotAfterExp = false;
         let nothingAfterExt = false;
-        let ps = this.current.pos.clone().next();
+        let ps = this.current.pos.clone();
 
         while (this.current.char && isFloatNumericExp(this.current.char)) {
             let char = this.current.char;
@@ -205,7 +205,7 @@ export default class Lexer {
          // add symbol immediately after the number
         this.symbol = this.makeSymbol();
 
-        let pe = this.current.pos.clone();
+        let pe = this.current.pos.clone().prev();
 
         // if dot count is 0, return an integer, otherwise float
         let possibleTypes = [TOKEN_INT, TOKEN_FLOAT];
@@ -218,7 +218,7 @@ export default class Lexer {
 
     protected makeWord = () => {
         let w = '';
-        let ps = this.current.pos.clone().next();
+        let ps = this.current.pos.clone();
 
         while (this.current.char && isWord(this.current.char)) {
             let char = this.current.char;
@@ -229,7 +229,7 @@ export default class Lexer {
         // add symbol immediately after the word
         this.symbol = this.makeSymbol();
 
-        let pe = this.current.pos.clone();
+        let pe = this.current.pos.clone().prev();
 
         let type = isKeyword(w) ? TOKEN_KEYWORD : TOKEN_IDENTIFIER;
         return new Token(type, w, p(ps, pe, this.textPart));
@@ -253,7 +253,7 @@ export default class Lexer {
             if (isSymbol(this.prevSymbolStr)) {
                 let type = SYMBOLS[this.prevSymbolStr];
                 if (type) {
-                    let pe = this.current.pos.clone();
+                    let pe = this.current.pos.clone().prev();
                     let ps = pe.clone().rewindBy(this.prevSymbolStr.length-1);
                     return new Token(type, undefined, p(ps, pe, this.textPart));
                 }
@@ -300,7 +300,7 @@ export default class Lexer {
     }
 
     protected rewind = (text: string =this.textPart!) => {
-        this.current.pos = new Position(-1, 1, 0);
+        this.current.pos = new Position(-1, 1, -1);
         this.current.char = null;
         this.current.symbolStr = "";
         this.next(text);

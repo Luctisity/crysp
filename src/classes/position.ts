@@ -15,7 +15,7 @@ export default class Position {
         this.col++;
 
         if (currentChar == '\n') {
-            this.col = 0;
+            this.col = 1;
             this.line++;
         }
 

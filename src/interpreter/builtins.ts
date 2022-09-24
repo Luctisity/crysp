@@ -1,4 +1,8 @@
+import { RuntimeException } from "../classes/exception";
 import { PositionRange } from "../classes/position";
+import { RTERROR_DIV_ZERO } from "../strings";
+
+export type BuiltinOrErr = Builtin | RuntimeException;
 
 interface Builtin {
 
@@ -7,7 +11,7 @@ interface Builtin {
     add      (what: Builtin): Builtin;
     subtract (what: Builtin): Builtin;
     multiply (what: Builtin): Builtin;
-    divide   (what: Builtin): Builtin;
+    divide   (what: Builtin): BuiltinOrErr;
     power    (what: Builtin): Builtin;
     modulo   (what: Builtin): Builtin;
 
@@ -50,8 +54,11 @@ export class BaseBuiltin {
         return new NumberBuiltin(this.numerify().value * what.numerify().value);
     }
 
-    divide (what: Builtin): Builtin {
-        return new NumberBuiltin(this.numerify().value / what.numerify().value);
+    divide (what: Builtin): BuiltinOrErr {
+        console.log(this.range);
+        let divider = what.numerify().value;
+        if (divider === 0) return new RuntimeException(RTERROR_DIV_ZERO, this.range);
+        return new NumberBuiltin(this.numerify().value / divider);
     }
 
     power (what: Builtin): Builtin {

@@ -30,7 +30,7 @@ else 7;
 4200000.1;*/`;
 console.log(text);
 
-function run () {
+function run (text: string) {
 
     const lexer = new Lexer(text);
     let [lexerResult, textPart] = lexer.tokenize();
@@ -45,9 +45,17 @@ function run () {
     else console.log(parseResult.toString());
     console.log(parseResult);
 
-    const interpreter = new Interpreter();
-    console.log(interpreter.interpret(parseResult));
+    const interpreter = new Interpreter(textPart);
+    let interpretResult = interpreter.interpret(parseResult);
+
+    if (interpretResult instanceof Exception) return console.error(interpretResult.toString());
+    console.log(interpretResult);
 
 }
 
-run();
+run(text);
+
+(document.querySelector('#runProg') as any).onclick = () => {
+    const text = (document.querySelector('#code') as any).value;
+    run (text);
+}

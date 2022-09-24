@@ -1,11 +1,12 @@
+import { RuntimeException } from "../classes/exception";
 import { 
     AtomNode, BaseNode, BinaryOpNode, BlockNode, BreakNode, 
     CasesNode, ContinueNode, DefaultCaseNode, DeleteNode, DoWhileNode,
     ElseNode, IfNode, ReturnNode, SwitchNode, ThrowNode, TryCatchNode, 
     UnaryOpNode, WhileNode
 } from "../parser/nodes";
-import { BaseBuiltin, BooleanBuiltin, NullBuiltin, NumberBuiltin } from "./builtins";
-import { getBooleanValue, isBoolean, isNumber, matchKeyword } from "./util";
+import { BaseBuiltin, BooleanBuiltin, BuiltinOrErr, NullBuiltin, NumberBuiltin } from "./builtins";
+import { getBooleanValue, isBoolean, isErr, isNumber, matchKeyword } from "./util";
 
 const BINARYOP_MAP: any = {
     'ADD': 'add',
@@ -38,6 +39,12 @@ const UNARYOP_MAP: any = {
 
 export default class Interpreter {
     
+    text?: string;
+
+    constructor (text?: string) {
+        this.text = text;
+    }
+
     passAtom = (node: AtomNode) => {
         let builtin: BaseBuiltin;
 
@@ -58,6 +65,7 @@ export default class Interpreter {
 
     passBinaryOp = (node: BinaryOpNode) => {
         const childLeft = this.pass(node.left);
+        if (isErr(childLeft)) return childLeft;
 
         const method = BINARYOP_MAP[node.operator.type] || matchKeyword(BINARYOP_MAP, node.operator);
         if (!method || !(childLeft as any)[method]) return this.passNothing();
@@ -72,6 +80,7 @@ export default class Interpreter {
         else if (method != 'or' && method != 'and')             shouldEvalRight = true;
 
         if (shouldEvalRight) childRight = this.pass(node.right);
+        if (isErr(childRight)) return childRight;
         
 
         const result: BaseBuiltin = (childLeft as any)[method](childRight);
@@ -80,6 +89,7 @@ export default class Interpreter {
 
     passUnaryOp = (node: UnaryOpNode) => {
         const child = this.pass(node.node);
+        if (isErr(child)) return child;
 
         const method = UNARYOP_MAP[node.operator.type] || matchKeyword(UNARYOP_MAP, node.operator);
         if (!method || !(child as any)[method]) return this.passNothing();
@@ -92,23 +102,27 @@ export default class Interpreter {
         let result: BaseBuiltin = this.passNothing();
 
         const children: BaseBuiltin[] = [];
+        let err: any;
+
         node.nodes.forEach(child => {
             result = this.pass(child);
             children.push(result);
+            if (isErr(result)) err = result;
         });
 
-        return result;
+        return (err || result).setPos(node.range);
     }
 
     passIf = (node: IfNode) => {
         const cond = this.pass(node.condIf);
+        if (isErr(cond)) return cond;
 
         let result: BaseBuiltin = this.passNothing();
 
         if ((cond as any).castBool().value) result = this.pass(node.thenIf);
         else if (node.thenElse) result = this.pass(node.thenElse);
 
-        return result;
+        return result.setPos(result.range);
     }
 
     passElse = (node: ElseNode) => {
@@ -199,7 +213,7 @@ export default class Interpreter {
         return new NullBuiltin();
     }
 
-    interpret (node: BlockNode) {
+    interpret (node: BlockNode): BuiltinOrErr {
         return this.pass(node.nodes[0]);
     }
 

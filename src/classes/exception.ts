@@ -51,6 +51,11 @@ export class Exception {
         return this.constructErrorStr();
     }
 
+    setPos (range?: PositionRange) {
+        this.range = range;
+        return this;
+    }
+
 }
 
 export class IllegalCharException extends Exception {
@@ -62,5 +67,11 @@ export class IllegalCharException extends Exception {
 export class SyntaxErrorException extends Exception {
 
     type = 'SyntaxError';
+
+}
+
+export class RuntimeException extends Exception {
+
+    type = 'RuntimeException';
 
 }

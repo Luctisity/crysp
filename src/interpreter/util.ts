@@ -1,5 +1,7 @@
+import { RuntimeException } from "../classes/exception";
 import { TOKEN_FLOAT, TOKEN_INT, TOKEN_KEYWORD } from "../lexer/constants";
 import Token from "../lexer/token";
+import { BuiltinOrErr } from "./builtins";
 
 export function isNumber (token: Token) {
     return token.type == TOKEN_INT || token.type == TOKEN_FLOAT;
@@ -15,4 +17,8 @@ export function getBooleanValue (token: Token) {
 
 export function matchKeyword (map: any, token: Token) {
     return token.type == TOKEN_KEYWORD ? map[token.value] : undefined;
+}
+
+export function isErr (h: BuiltinOrErr) {
+    return h instanceof RuntimeException;
 }

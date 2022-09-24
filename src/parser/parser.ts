@@ -43,7 +43,7 @@ export default class Parser {
         let pe = this.current.token?.range!.clone().end;
 
         // if the resulting node contains an error, raise it
-        const node = ruleAdapter.getCorrespondingNode(block, true, p(ps, pe));
+        const node = ruleAdapter.getCorrespondingNode(block, true, p(ps, pe, this.text));
         if (ruleAdapter.doesBlockContainsError(node)) {
             this.next();
             return ruleAdapter.getSyntaxError(this.current.token!);
@@ -128,7 +128,7 @@ export default class Parser {
                 step = 1;
                 let ps = nodes[0].range?.start;
                 let pe = nodes[nodes.length-1].range?.end;
-                const targetNode = ruleAdapter.getCorrespondingNode(nodes, false, p(ps!, pe));
+                const targetNode = ruleAdapter.getCorrespondingNode(nodes, false, p(ps!, pe, this.text));
                 if (targetNode) nodes = [targetNode];
             }
 
@@ -185,7 +185,7 @@ export default class Parser {
                     tryNextVariation();
                     continue;
                 }
-                const targetNode = ruleAdapter.getCorrespondingNode(nodeData, isBlock, p(ps, pe));
+                const targetNode = ruleAdapter.getCorrespondingNode(nodeData, isBlock, p(ps, pe, this.text));
 
                 if (ruleAdapter.doesBlockContainsError(targetNode)) {
                     this.next();
