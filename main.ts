@@ -38,6 +38,8 @@ function run (text: string) {
     if (lexerResult instanceof Exception) return console.error(lexerResult.toString());
     else console.log(lexerResult.toString());
 
+    if (!lexerResult.length) return console.error("Cannot run empty program");
+
     const parser = new Parser(lexerResult, textPart);
     let parseResult = parser.parse();
 
