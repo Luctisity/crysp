@@ -1,5 +1,8 @@
+import { SyntaxErrorException } from "../classes/exception";
+import { ATOMS, SYMBOLS, TOKEN_IDENTIFIER, TOKEN_KEYWORD } from "../lexer/constants";
 import Token from "../lexer/token";
-import { BaseNode, BlockNode, NODE_MAP } from "./nodes";
+import { ERROR_UNEXP_TOKEN, h } from "../strings";
+import { BaseNode, BlockNode, NODE_INPUT_NODES, NODE_MAP } from "./nodes";
 
 export type Rule = string[][];
 
@@ -93,6 +96,46 @@ export default class ParserRuleAdapter {
 
     doesRuleListenToNewLines (rule: Rule) {
         return rule.filter(f => f.includes("@NEWL")).length;
+    }
+
+    doesBlockContainsError (targetNode: any) {
+        let error = false;
+
+        if (targetNode instanceof BlockNode && targetNode.nodes.filter(f => f instanceof Token).length) error = true;
+        else if (targetNode) {
+            NODE_INPUT_NODES.forEach(nodeName => {
+                if (error) return;
+                if (targetNode[nodeName] && targetNode[nodeName] instanceof Token) error = true;
+            });
+        }
+
+        return error;
+    }
+
+    serializeToken (token: Token) {
+
+        const type = token.type;
+
+        // for words, return the value (the word itself)
+        if (type == TOKEN_IDENTIFIER || type == TOKEN_KEYWORD) return token.value;
+
+        // for strings and numbers, search the type in a special map and return the result
+        const atomType = Object.keys(ATOMS).indexOf(type);
+        if (atomType >= 0) return Object.values(ATOMS)[atomType];
+
+        // for symbols, search the key in the symbols map and return it
+        const symbolType = Object.values(SYMBOLS).indexOf(type);
+        if (symbolType >= 0) return Object.keys(SYMBOLS)[symbolType];
+
+        // if all fails, just stringify the token
+        return token.toString();
+
+    }
+
+    getSyntaxError (token?: Token) {
+        if (!token) return new SyntaxErrorException(h(ERROR_UNEXP_TOKEN, 'bruh'));
+
+        return new SyntaxErrorException(h(ERROR_UNEXP_TOKEN, this.serializeToken(token)), token.range?.clone())
     }
 
 }

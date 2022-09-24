@@ -29,6 +29,12 @@ export default class Position {
         return this;
     }
 
+    rewindBy (n: number) {
+        this.index -= n;
+        this.col -= n;
+        return this;
+    }
+
     clone () {
         return new Position(this.index, this.line, this.col);
     }

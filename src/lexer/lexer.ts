@@ -128,11 +128,17 @@ export default class Lexer {
 
     protected makeString = (closeSymbol: string) => {
         let s = '';
+        let ps = this.current.pos.clone().next();
         this.next();
 
         // loop through all the character until a closing quote is found or the end is reached
         while (this.current.char && this.current.char != closeSymbol) {
             let char = this.current.char;
+
+            if (char == COMMENT_NEWLINE) {
+                this.prev();
+                return new IllegalCharException(ERROR_UNCLOSED_STR, p(this.current.pos, this.text));
+            }
 
             // if the char is a backslash, treat it as an escape command for the next char
             if (char == '\\') {
@@ -155,7 +161,8 @@ export default class Lexer {
         this.symbol = this.makeSymbol();
 
         // otherwise, return the result string as a token
-        return new Token(TOKEN_STRING, s);
+        let pe = this.current.pos.clone().next();
+        return new Token(TOKEN_STRING, s, p(ps, pe, this.textPart));
     }
 
     protected makeNumber = () => {
@@ -164,6 +171,7 @@ export default class Lexer {
         let exps = 0;
         let dotAfterExp = false;
         let nothingAfterExt = false;
+        let ps = this.current.pos.clone().next();
 
         while (this.current.char && isFloatNumericExp(this.current.char)) {
             let char = this.current.char;
@@ -195,14 +203,20 @@ export default class Lexer {
          // add symbol immediately after the number
         this.symbol = this.makeSymbol();
 
+        let pe = this.current.pos.clone();
+
         // if dot count is 0, return an integer, otherwise float
         let possibleTypes = [TOKEN_INT, TOKEN_FLOAT];
         let possibleFuncs = [parseInt,  parseFloat ];
-        return new Token(possibleTypes[dots||exps], possibleFuncs[dots||exps](n));
+        return new Token(
+            possibleTypes[dots||exps], possibleFuncs[dots||exps](n), 
+            p(ps, pe, this.textPart)
+        );
     }
 
     protected makeWord = () => {
         let w = '';
+        let ps = this.current.pos.clone().next();
 
         while (this.current.char && isWord(this.current.char)) {
             let char = this.current.char;
@@ -213,8 +227,10 @@ export default class Lexer {
         // add symbol immediately after the word
         this.symbol = this.makeSymbol();
 
+        let pe = this.current.pos.clone();
+
         let type = isKeyword(w) ? TOKEN_KEYWORD : TOKEN_IDENTIFIER;
-        return new Token(type, w);
+        return new Token(type, w, p(ps, pe, this.textPart));
     }
 
     protected makeSymbol = () => {
@@ -234,7 +250,11 @@ export default class Lexer {
             // if it did  match a symbol on previous iteration, construct a symbol token
             if (isSymbol(this.prevSymbolStr)) {
                 let type = SYMBOLS[this.prevSymbolStr];
-                if (type) return new Token(type);
+                if (type) {
+                    let pe = this.current.pos.clone();
+                    let ps = pe.clone().rewindBy(this.prevSymbolStr.length-1);
+                    return new Token(type, undefined, p(ps, pe, this.textPart));
+                }
 
             // if the previous symbol string was of some length, that means there's an unexpected character
             // throw error

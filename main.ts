@@ -3,11 +3,17 @@ import Lexer from './src/lexer/lexer';
 import Parser from './src/parser/parser';
 
 const text = `
-do {
-    "Hello"; "Hi";
-    true * 3
-} while (6 == 7);
-return 6;`;
+switch (5) {
+    case 4:
+        69
+    case 5:
+        420
+    case 8:
+        69;
+        42;
+    default:
+        69420;
+}`;
 console.log(text);
 
 function run () {

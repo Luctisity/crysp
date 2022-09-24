@@ -105,6 +105,12 @@ export const SYMBOLS: any = {
     '}':   TOKEN_CCURLY,
 }
 
+export const ATOMS: any = {
+    'STRING': 'string',
+    'INT':    'number',
+    'FLOAT':  'number'
+}
+
 export const STRING_ESCAPE_CODES: any = {
     'b': '\b',
     'f': '\f',

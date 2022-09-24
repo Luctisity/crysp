@@ -1,7 +1,6 @@
-import { SyntaxErrorException } from "../classes/exception";
+import { Exception } from "../classes/exception";
 import { TOKEN_BLOCKSEP, TOKEN_NEWL } from "../lexer/constants";
 import Token from "../lexer/token";
-import { ERROR_UNEXP_TOKEN, h } from "../strings";
 import grammarRules from "./grammarRules.json";
 import ParserRuleAdapter, { Rule } from "./ruleAdapter";
 
@@ -9,6 +8,8 @@ export type ParserCurrentState = {
     index: number
     token: Token | null
 }
+
+export type RuleReturn = Exception | any[];
 
 export default class Parser {
 
@@ -31,17 +32,22 @@ export default class Parser {
         // the most outer rule is block, create it and return the result node
         const ruleAdapter = new ParserRuleAdapter();
         const block = this.rule('block');
+        if (block instanceof Exception) return block;
         const node = ruleAdapter.getCorrespondingNode(block, true);
-        return node
-            || new SyntaxErrorException(h(ERROR_UNEXP_TOKEN, this.current.token!.toString()));
+        if (ruleAdapter.doesBlockContainsError(node)) {
+            this.next();
+            return ruleAdapter.getSyntaxError(this.current.token!);
+        }
+
+        return node;
     }
 
 
     // recursive rule function
 
-    protected rule = (name: string, rec: number = 0) => {
+    protected rule = (name: string, rec: number = 0): RuleReturn => {
         // setup
-        
+        if (name == 'expr') rec = -99999;
         const ruleData: Rule = (grammarRules as any)[name];
         const ruleAdapter = new ParserRuleAdapter();
         if (!ruleData) return [];
@@ -51,6 +57,8 @@ export default class Parser {
         let variation = 0;
 
         let finished = false;
+        let error = false;
+
         let isBlock  = false;
         if (name == 'case') isBlock = true;
 
@@ -74,6 +82,16 @@ export default class Parser {
         const tryNextVariation = () => {
             variation++;
             if (variation >= ruleData.length) finished = true;
+
+            // if found a special "**" instruction,
+            // begin a block and reset both the step and the variation
+            else if (ruleData[variation][step] == "**") {
+                step = 0;
+                variation = 0;
+                isBlock = true;
+                finished = false;
+                return
+            }
         }
 
         // go to the next step and advance
@@ -105,7 +123,7 @@ export default class Parser {
 
 
         // main loop
-        //if (rec > -1 || rec == -99999) console.log(this.indent(rec), 'entered rule', name);
+        if (rec > -1 || rec == -99999) console.log(this.indent(rec), 'entered rule', name);
         while (!finished && this.current.token) {
             // get the #step from #variation from the rule (the current item)
             const item = ruleData[variation][step];
@@ -135,11 +153,21 @@ export default class Parser {
                 // if the rule returned no result, try next variation
                 const ruleName = item.slice(1);
                 const nodeData = this.rule(ruleName, rec+1);
+
+                // if returned an exception, pass it on
+                if (nodeData instanceof Exception) return nodeData;
+
                 if (!nodeData.length) {
                     tryNextVariation();
                     continue;
                 }
                 const targetNode = ruleAdapter.getCorrespondingNode(nodeData, isBlock);
+
+                if (ruleAdapter.doesBlockContainsError(targetNode)) {
+                    this.next();
+                    error = true;
+                    break;
+                }
 
                 // if is block, push it's nodes into the current node list directly 
                 // (to avoid nested blocks)
@@ -153,7 +181,9 @@ export default class Parser {
                 else if (targetNode) nodes.push(targetNode);
 
                 // if there's no node, finish
-                else nodes.push(...nodeData);
+                else {
+                    nodes.push(...nodeData);
+                }
 
                 // advance
                 nextStep();
@@ -167,9 +197,12 @@ export default class Parser {
 
         // back up by one after finishing the rule and return the nodes (unless no nodes found)
 
-        //if (rec > -1 || rec == -99999) console.log(this.indent(rec), 'exited rule', name, nodes);
-        if (nodes.length) this.prev();
-        return nodes;
+        if (rec > -1 || rec == -99999) console.log(this.indent(rec), 'exited rule', name, nodes);
+        if (nodes.length || (error && !this.current.token)) this.prev();
+
+        return error
+            ? ruleAdapter.getSyntaxError(this.current.token!)
+            : nodes;
 
     }
 

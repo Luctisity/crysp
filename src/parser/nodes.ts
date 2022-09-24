@@ -1,3 +1,4 @@
+import { TOKEN_KEYWORD } from "../lexer/constants";
 import Token from "../lexer/token";
 
 export class BaseNode {
@@ -131,10 +132,16 @@ export class SwitchNode extends BaseNode {
     defcase?: BaseNode;
 
     constructor (_keyword: Token, cond: BaseNode, cases: BaseNode, defcase?: BaseNode) {
+        
         super();
         this.cond    = cond;
         this.cases   = cases;
         this.defcase = defcase;
+
+        if (this.cases instanceof DefaultCaseNode) {
+            this.defcase = this.cases;
+            this.cases = new CasesNode();
+        }
     }
 
     toString () {
@@ -175,14 +182,15 @@ export class CasesNode extends BaseNode {
         let type = 0;
         let lastItem: any = {};
         nodes.forEach((node: any) => {
+            if (node && node.type == TOKEN_KEYWORD) type = 0;
             switch (type) {
                 case 0: break;
                 case 1: 
                     lastItem = { cond: node.nodes ? node.nodes[0]: node }; 
+                    this.cases.push(lastItem);
                     break;
                 case 2: 
-                    lastItem.block = node; 
-                    this.cases.push(lastItem); 
+                    this.cases[this.cases.length-1].block = node; 
                     break;
             }
             type++;
@@ -342,15 +350,17 @@ export const NODE_MAP = {
     '%,@,%': BinaryOpNode,      // binary operators
     '%,@BLOCKSEP,%': BlockNode, // node + block separation token + node is a block, not a binary operator
     '@,%':   UnaryOpNode,       // unary operators
+    '@KEYWORD,%':   'pass',
+    '%,@KEYWORD,%': 'pass',
 
-    '@KEYWORD:if,%':   IfNode,   // if
+    '@KEYWORD:if,%,%':   IfNode,   // if
     '@KEYWORD:else,%': ElseNode, // else
 
     '@KEYWORD:switch,%,%': SwitchNode,      // switch
-    '@KEYWORD:case,%,%':   CasesNode,       // switch cases
+    '@KEYWORD:case,%':     CasesNode,       // switch cases
     '@KEYWORD:default,%':  DefaultCaseNode, // switch default case
 
-    '@KEYWORD:while,%':               WhileNode,    // while
+    '@KEYWORD:while,%,%':               WhileNode,    // while
     '@KEYWORD:do,%,@KEYWORD:while,%': DoWhileNode,  // do while
     
     '@KEYWORD:return':   ReturnNode,   // return command
@@ -362,3 +372,9 @@ export const NODE_MAP = {
     '@KEYWORD:try,%,@KEYWORD:catch': TryCatchNode, // try-catch
 
 }
+
+export const NODE_INPUT_NODES = [
+    'left', 'right', 'node', 'condIf', 'thenIf', 'thenElse', 
+    'block', 'cond', 'cases', 'defcase', 'tryBlock', 'catchBlock', 
+    'errorParam', 'expr'
+]

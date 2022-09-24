@@ -32,10 +32,12 @@
 
     "switch": [
         ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$case", "$default", "@CCURLY&"],
-        ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$case", "@CCURLY&"]
+        ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$case", "@CCURLY&"],
+        ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$default", "@CCURLY&"]
     ],
     "case": [
-        ["@KEYWORD:case", "$expr", "@COLON&", "$block", "**"]
+        ["@KEYWORD:case", "$expr", "@COLON&", "$block", "**"],
+        ["@KEYWORD:case", "$expr", "@COLON&", "**"]
     ],
     "default": [
         ["@KEYWORD:default", "@COLON&", "$block"]
