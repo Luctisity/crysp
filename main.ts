@@ -6,6 +6,7 @@ const text = `
 switch (5) {
     case 4:
         69
+        a
     case 5:
         420
     case 8:

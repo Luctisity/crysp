@@ -108,7 +108,8 @@ export const SYMBOLS: any = {
 export const ATOMS: any = {
     'STRING': 'string',
     'INT':    'number',
-    'FLOAT':  'number'
+    'FLOAT':  'number',
+    'NEWL':   'new line'
 }
 
 export const STRING_ESCAPE_CODES: any = {

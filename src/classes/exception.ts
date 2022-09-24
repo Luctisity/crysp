@@ -10,6 +10,11 @@ export class Exception {
     constructor (details?: string, range?: PositionRange) {
         this.details = details;
         this.range   = range;
+        
+        if (this.range && this.range.start.col < 1) {
+            this.range.start.next();
+            this.range.end.next();
+        }
     }
 
     protected constructErrorStr () {
