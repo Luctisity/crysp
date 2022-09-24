@@ -88,11 +88,20 @@ export default class Parser {
         // go to the next variation, if none left, finish
         const tryNextVariation = () => {
             variation++;
-            if (variation >= ruleData.length) finished = true;
+
+            // if none left, finish
+            if (variation >= ruleData.length) {
+                finished = true;
+
+                // if no variation matches in the most outer role, throw error
+                if (rec == 0) {
+                    this.next();
+                    error = true;
+                }
 
             // if found a special "**" instruction,
             // begin a block and reset both the step and the variation
-            else if (ruleAdapter.isABlockRepeatInstruction(ruleData, variation, step)) {
+            } else if (ruleAdapter.isABlockRepeatInstruction(ruleData, variation, step)) {
                 step = 0;
                 variation = 0;
                 isBlock = true;

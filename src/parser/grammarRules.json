@@ -22,6 +22,7 @@
     "if": [
         ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&", "$else"],
         ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
+        ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "$command", "@BLOCKSEP&", "$else"],
         ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "$command", "$else"],
         ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "$command"]
     ],

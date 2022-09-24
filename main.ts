@@ -16,6 +16,10 @@ switch (5) {
         69420;
 }
 
+if (5 == true) 5; 
+else if (6) 6;
+else 7;
+
 4200000.1;`;
 console.log(text);
 
