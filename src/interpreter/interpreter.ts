@@ -110,7 +110,7 @@ export default class Interpreter {
             if (isErr(result)) err = result;
         });
 
-        return (err || result).setPos(node.range);
+        return err || result;
     }
 
     passIf = (node: IfNode) => {
@@ -122,7 +122,7 @@ export default class Interpreter {
         if ((cond as any).castBool().value) result = this.pass(node.thenIf);
         else if (node.thenElse) result = this.pass(node.thenElse);
 
-        return result.setPos(result.range);
+        return result;
     }
 
     passElse = (node: ElseNode) => {
