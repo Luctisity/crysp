@@ -10,6 +10,7 @@
         ["$switch"],
         ["$while"],
         ["$dowhile"],
+        ["$repeat"],
         ["$trycatch"],
         ["$expr"],
         ["$return"],
@@ -51,6 +52,10 @@
     "dowhile": [
         ["@KEYWORD:do", "@OCURLY&", "$block", "@CCURLY&", "@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&"],
         ["@KEYWORD:do", "$command", "@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&"]
+    ],
+    "repeat": [
+        ["@KEYWORD:repeat", "@OPAREN&", "$expr", "@CPAREN&",  "@OCURLY&", "$block", "@CCURLY&"],
+        ["@KEYWORD:repeat", "@OPAREN&", "$expr", "@CPAREN&", "$command"]
     ],
 
     "trycatch": [

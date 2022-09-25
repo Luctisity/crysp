@@ -252,6 +252,25 @@ export class DoWhileNode extends BaseNode {
 
 }
 
+export class RepeatNode extends BaseNode {
+
+    type = 'repeat';
+
+    expr:  BaseNode;
+    block: BaseNode;
+
+    constructor (_keyword: Token, expr: BaseNode, block: BaseNode) {
+        super();
+        this.expr  = expr;
+        this.block = block;
+    }
+
+    toString () {
+        return `repeat ${this.expr} ${this.block}`;
+    }
+
+}
+
 export class TryCatchNode extends BaseNode {
 
     type = 'trycatch';
@@ -374,8 +393,9 @@ export const NODE_MAP = {
     '@KEYWORD:case,%':     CasesNode,       // switch cases
     '@KEYWORD:default,%':  DefaultCaseNode, // switch default case
 
-    '@KEYWORD:while,%,%':               WhileNode,    // while
+    '@KEYWORD:while,%,%':             WhileNode,    // while
     '@KEYWORD:do,%,@KEYWORD:while,%': DoWhileNode,  // do while
+    '@KEYWORD:repeat,%,%':            RepeatNode,   // repeat
     
     '@KEYWORD:return':   ReturnNode,   // return command
     '@KEYWORD:break':    BreakNode,    // break command

@@ -1,9 +1,8 @@
-import { RuntimeException } from "../classes/exception";
 import { 
     AtomNode, BaseNode, BinaryOpNode, BlockNode, BreakNode, 
     CasesNode, ContinueNode, DefaultCaseNode, DeleteNode, DoWhileNode,
-    ElseNode, IfNode, ReturnNode, SwitchNode, ThrowNode, TryCatchNode, 
-    UnaryOpNode, WhileNode
+    ElseNode, IfNode, RepeatNode, ReturnNode, SwitchNode, ThrowNode, 
+    TryCatchNode, UnaryOpNode, WhileNode
 } from "../parser/nodes";
 import { BaseBuiltin, BooleanBuiltin, BuiltinOrErr, NullBuiltin, NumberBuiltin } from "./builtins";
 import { getBooleanValue, isBoolean, isErr, isNumber, matchKeyword } from "./util";
@@ -153,6 +152,18 @@ export default class Interpreter {
         const child = this.pass(node.block);
     }
 
+    passRepeat = (node: RepeatNode) => {
+        const expr = this.pass(node.expr);
+        if (isErr(expr)) return expr;
+
+        let lastBlock = this.passNothing();
+        let iter = Math.round(expr.numerify().value); // make the iteration number an integer by rounding it
+
+        for (let i = 0; i < iter; i++) lastBlock = this.pass(node.block);
+
+        return lastBlock;
+    }
+
     passTryCatch = (node: TryCatchNode) => {
         const childTry   = this.pass(node.tryBlock);
         const childCatch = this.pass(node.catchBlock);
@@ -195,6 +206,7 @@ export default class Interpreter {
 
         'while':       this.passWhile,
         'dowhile':     this.passDoWhile,
+        'repeat':      this.passRepeat,
         'trycatch':    this.passTryCatch,
 
         'return':      this.passReturn,
@@ -214,7 +226,7 @@ export default class Interpreter {
     }
 
     interpret (node: BlockNode): BuiltinOrErr {
-        return this.pass(node.nodes[0]);
+        return this.pass(node);
     }
 
 }

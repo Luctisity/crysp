@@ -57,7 +57,7 @@ export const KEYWORDS = [
     'let', 'func', 'const', 'enum', 'event',
     'true', 'false', 'null',
     'if', 'else', 'switch', 'case', 'default',
-    'while', 'do', 'for', 'in', 'try', 'catch',
+    'while', 'do', 'for', 'in', 'repeat', 'try', 'catch',
     'return', 'break', 'continue', 'throw', 'delete',
     'class', 'new', 'super', 'self', 'get', 'set'
 ];
