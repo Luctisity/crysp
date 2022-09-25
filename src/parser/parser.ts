@@ -106,7 +106,10 @@ export default class Parser {
                 }
 
                 // if no variation matches in the most outer role, throw error
-                if (rec == 0) error = true;
+                if (rec == 0) {
+                    this.next();
+                    error = true;
+                }
 
             // if found a special "**" instruction,
             // begin a block and reset both the step and the variation

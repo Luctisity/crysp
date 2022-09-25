@@ -7,3 +7,8 @@ x add an option for variable children count node (block nodes)
 x automatic semicolon placement at the end of block statements
 x add error handling
 - generalize multi-child node types (blocks, switch cases, etc.)
+
+[Interpreter]
+
+- add string types and related operations
+- switch case
