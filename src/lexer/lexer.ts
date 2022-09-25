@@ -23,7 +23,7 @@ export type LexerResult = [Token[] | Exception, string | undefined]
 export default class Lexer {
 
     current: LexerCurrentState = {
-        pos: new Position(-1, 1, -1),
+        pos: new Position(-1, 1, 0),
         char: null,
         symbolStr: ""
     }
@@ -300,7 +300,7 @@ export default class Lexer {
     }
 
     protected rewind = (text: string =this.textPart!) => {
-        this.current.pos = new Position(-1, 1, -1);
+        this.current.pos = new Position(-1, 1, 0);
         this.current.char = null;
         this.current.symbolStr = "";
         this.next(text);
