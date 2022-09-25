@@ -49,7 +49,7 @@ function run (text: string) {
 
     const interpreter = new Interpreter(textPart);
     let interpretResult = interpreter.interpret(parseResult);
-
+    
     if (interpretResult instanceof Exception) return console.error(interpretResult.toString());
     console.log(interpretResult);
 
@@ -57,7 +57,13 @@ function run (text: string) {
 
 run(text);
 
+(document.querySelector('#code') as any).value = localStorage.getItem('code') || "";
+
 (document.querySelector('#runProg') as any).onclick = () => {
     const text = (document.querySelector('#code') as any).value;
     run (text);
+}
+
+(document.querySelector('#code') as any).oninput = () => {
+    localStorage.setItem('code', (document.querySelector('#code') as any).value);
 }

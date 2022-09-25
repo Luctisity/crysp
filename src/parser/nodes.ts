@@ -296,6 +296,46 @@ export class TryCatchNode extends BaseNode {
 
 }
 
+export class VarDeclareNode extends BaseNode {
+
+    type = 'varDeclare';
+
+    name:  Token;
+    expr?:  BaseNode;
+
+    constructor (_keyword: Token, name: Token, expr?: BaseNode) {
+        super();
+        this.name  = name;
+        this.expr  = expr;
+    }
+
+    toString () {
+        return `[let ${this.name}${this.expr ? ' = ' + this.expr : ''}]`;
+    }
+
+}
+
+export class VarAssignNode extends BaseNode {
+
+    type = 'varAssign';
+
+    name:     Token;
+    operator: Token;
+    expr?:    BaseNode;
+
+    constructor (name: Token, operator: Token, expr?: BaseNode) {
+        super();
+        this.name     = name;
+        this.operator = operator;
+        this.expr     = expr;
+    }
+
+    toString () {
+        return `[${this.name} ${this.operator} ${this.expr}]`;
+    }
+
+}
+
 export class ReturnNode extends BaseNode {
 
     type = 'return';
@@ -368,17 +408,18 @@ export class ThrowNode extends BaseNode {
 // this system needs to be redone at some point
 
 export const NODE_MAP = {
-    '@INT':            AtomNode,    // number values
-    '@FLOAT':          AtomNode,    // number values
-    '@STRING':         AtomNode,    // string values
-    '@KEYWORD:true':   AtomNode,    // boolean values
-    '@KEYWORD:false':  AtomNode,    // boolean values
-    '@KEYWORD:null':   AtomNode,    // null value
+    '@INT':            AtomNode, // number values
+    '@FLOAT':          AtomNode, // number values
+    '@STRING':         AtomNode, // string values
+    '@KEYWORD:true':   AtomNode, // boolean values
+    '@KEYWORD:false':  AtomNode, // boolean values
+    '@KEYWORD:null':   AtomNode, // null value
+    '@IDENTIFIER':     AtomNode, // variable access
 
-    '%':     'pass',            // signle nodes
-    '%,@,%': BinaryOpNode,      // binary operators
-    '%,@BLOCKSEP,%': BlockNode, // node + block separation token + node is a block, not a binary operator
-    '@,%':   UnaryOpNode,       // unary operators
+    '%':     'pass',               // signle nodes
+    '%,@,%': BinaryOpNode,         // binary operators
+    '%,@BLOCKSEP,%': BlockNode,    // node + block separation token + node is a block, not a binary operator
+    '@,%':   UnaryOpNode,          // unary operators
     '@KEYWORD,%':   'pass',
     '@KEYWORD:not,%': UnaryOpNode, // unary operators
     '%,@KEYWORD,%': 'pass',
@@ -396,6 +437,9 @@ export const NODE_MAP = {
     '@KEYWORD:while,%,%':             WhileNode,    // while
     '@KEYWORD:do,%,@KEYWORD:while,%': DoWhileNode,  // do while
     '@KEYWORD:repeat,%,%':            RepeatNode,   // repeat
+
+    '@IDENTIFIER,@':            VarAssignNode,  // var assignment node
+    '@KEYWORD:let,@IDENTIFIER': VarDeclareNode, // variable declaration
     
     '@KEYWORD:return':   ReturnNode,   // return command
     '@KEYWORD:break':    BreakNode,    // break command

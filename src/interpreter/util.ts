@@ -1,5 +1,5 @@
 import { RuntimeException } from "../classes/exception";
-import { TOKEN_FLOAT, TOKEN_INT, TOKEN_KEYWORD } from "../lexer/constants";
+import { TOKEN_FLOAT, TOKEN_IDENTIFIER, TOKEN_INT, TOKEN_KEYWORD } from "../lexer/constants";
 import Token from "../lexer/token";
 import { BuiltinOrErr } from "./builtins";
 
@@ -9,6 +9,10 @@ export function isNumber (token: Token) {
 
 export function isBoolean (token: Token) {
     return token.type == TOKEN_KEYWORD && (token.value == 'true' || token.value == 'false');
+}
+
+export function isVariable (token: Token) {
+    return token.type == TOKEN_IDENTIFIER;
 }
 
 export function getBooleanValue (token: Token) {

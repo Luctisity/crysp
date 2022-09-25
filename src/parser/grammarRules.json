@@ -12,7 +12,10 @@
         ["$dowhile"],
         ["$repeat"],
         ["$trycatch"],
+
+        ["$varDeclare"],
         ["$expr"],
+
         ["$return"],
         ["$break"],
         ["$continue"],
@@ -63,7 +66,28 @@
         ["@KEYWORD:try", "@OCURLY&", "$block", "@CCURLY&", "@KEYWORD:catch", "@OCURLY&", "$block", "@CCURLY&"]
     ],
 
+    "varDeclare": [
+        ["@KEYWORD:let", "@IDENTIFIER", "@ASSIGN&", "$expr"],
+        ["@KEYWORD:let", "@IDENTIFIER"]
+    ],
+    "varAssign": [
+        ["@IDENTIFIER", "@ASSIGN", "$expr"],
+        ["@IDENTIFIER", "@ADDTO", "$expr"],
+        ["@IDENTIFIER", "@SUBFROM", "$expr"],
+        ["@IDENTIFIER", "@MULBY", "$expr"],
+        ["@IDENTIFIER", "@DIVBY", "$expr"],
+        ["@IDENTIFIER", "@POWERBY", "$expr"],
+        ["@IDENTIFIER", "@MODBY", "$expr"],
+        ["@IDENTIFIER", "@INCR"],
+        ["@IDENTIFIER", "@DECR"]
+    ],
+
     "expr": [
+        ["$varAssign"],
+        ["$logic"]
+    ],
+
+    "logic": [
         ["$compare", "$and", "$compare", "*"],
         ["$compare", "$or", "$compare", "*"],
         ["$compare", "$not", "$compare", "*"],
