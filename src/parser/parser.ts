@@ -98,6 +98,13 @@ export default class Parser {
             if (variation >= ruleData.length) {
                 finished = true;
 
+                // another hardcoded rule, because I didn't find any other way
+                // TODO: remove or generalize
+                if (name == 'varAssign' && nodes.length == 1) {
+                    nodes = [];
+                    this.prev();
+                }
+
                 // if no variation matches in the most outer role, throw error
                 if (rec == 0) error = true;
 
@@ -108,7 +115,6 @@ export default class Parser {
                 variation = 0;
                 isBlock = true;
                 finished = false;
-                return
             }
         }
 

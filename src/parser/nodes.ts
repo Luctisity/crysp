@@ -427,7 +427,7 @@ export const NODE_MAP = {
     '%,@KEYWORD:and,%': BinaryOpNode,
     '%,@KEYWORD:or,%': BinaryOpNode,
 
-    '@KEYWORD:if,%,%':   IfNode,   // if
+    '@KEYWORD:if,%,%': IfNode,   // if
     '@KEYWORD:else,%': ElseNode, // else
 
     '@KEYWORD:switch,%,%': SwitchNode,      // switch
@@ -438,7 +438,9 @@ export const NODE_MAP = {
     '@KEYWORD:do,%,@KEYWORD:while,%': DoWhileNode,  // do while
     '@KEYWORD:repeat,%,%':            RepeatNode,   // repeat
 
-    '@IDENTIFIER,@':            VarAssignNode,  // var assignment node
+    '@IDENTIFIER,@,%':          VarAssignNode,  // var assignment node
+    '@IDENTIFIER,@INCR':        VarAssignNode,  // var assignment node
+    '@IDENTIFIER,@DECR':        VarAssignNode,  // var assignment node
     '@KEYWORD:let,@IDENTIFIER': VarDeclareNode, // variable declaration
     
     '@KEYWORD:return':   ReturnNode,   // return command

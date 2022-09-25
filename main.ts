@@ -4,7 +4,7 @@ import Parser from './src/parser/parser';
 import Interpreter from './src/interpreter/interpreter';
 
 const text = `
-if (true) {
+/*if (true) {
     true is true;
 } else 420;
 
@@ -32,6 +32,8 @@ console.log(text);
 
 function run (text: string) {
 
+    console.log('\n\n----- 1️⃣ LEXING -----');
+
     const lexer = new Lexer(text);
     let [lexerResult, textPart] = lexer.tokenize();
 
@@ -40,12 +42,16 @@ function run (text: string) {
 
     if (!lexerResult.length) return console.error("Cannot run empty program");
 
+    console.log('----- 2️⃣ PARSING -----');
+
     const parser = new Parser(lexerResult, textPart);
     let parseResult = parser.parse();
 
     if (parseResult instanceof Exception) return console.error(parseResult.toString());
     else console.log(parseResult.toString());
     console.log(parseResult);
+
+    console.log('----- 3️⃣ INTERPRETING -----');
 
     const interpreter = new Interpreter(textPart);
     let interpretResult = interpreter.interpret(parseResult);

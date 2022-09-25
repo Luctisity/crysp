@@ -155,7 +155,7 @@ export default class Interpreter {
 
         let result: BaseBuiltin = this.passNothing();
 
-        if ((cond as any).castBool().value) result = this.pass(node.thenIf, context);
+        if (cond.castBool().value) result = this.pass(node.thenIf, context);
         else if (node.thenElse) result = this.pass(node.thenElse, context);
 
         return result;
@@ -180,13 +180,35 @@ export default class Interpreter {
     }
 
     passWhile = (node: WhileNode, context: Context) => {
-        const cond  = this.pass(node.cond, context);
-        const child = this.pass(node.block, context);
+        let cond  = this.pass(node.cond, context);
+        if (isErr(cond)) return cond;
+
+        let lastBlock = this.passNothing();
+        while (cond.castBool().value) {
+            lastBlock = this.pass(node.block, context);
+
+            cond = this.pass(node.cond, context);
+            if (isErr(cond)) return cond;
+        }
+
+        return lastBlock;
     }
 
     passDoWhile = (node: DoWhileNode, context: Context) => {
-        const cond  = this.pass(node.cond, context);
-        const child = this.pass(node.block, context);
+        let lastBlock = this.pass(node.block, context);
+        if (isErr(lastBlock)) return;
+
+        let cond  = this.pass(node.cond, context);
+        if (isErr(cond)) return cond;
+
+        while (cond.castBool().value) {
+            lastBlock = this.pass(node.block, context);
+
+            cond = this.pass(node.cond, context);
+            if (isErr(cond)) return cond;
+        }
+
+        return lastBlock;
     }
 
     passRepeat = (node: RepeatNode, context: Context) => {
@@ -265,6 +287,12 @@ export default class Interpreter {
 
     passThrow = (node: ThrowNode, context: Context) => {
         const child = node.expr ? this.pass(node.expr, context) : null;
+
+        if (!child)       return this.passNothing();
+        if (isErr(child)) return child;
+        
+        console.log('[LOGS]', child.value);
+        return this.passNothing();
     }
     
 
