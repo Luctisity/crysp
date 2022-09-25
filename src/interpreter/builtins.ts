@@ -33,6 +33,7 @@ interface Builtin {
     negate   (): NumberBuiltin;
     castBool (): BooleanBuiltin;
     invert   (): BooleanBuiltin;
+    castStr  (): StringBuiltin;
 
 }
 
@@ -57,6 +58,11 @@ export class BaseBuiltin {
     }
 
     add (what: Builtin): Builtin {
+        // if at least one of the sides is string, concatinate strings
+        // otherwise, add as numbers
+        if (this instanceof StringBuiltin || what instanceof StringBuiltin)
+            return new StringBuiltin(this.castStr().value + what.castStr().value).setContext(this.context);
+
         return new NumberBuiltin(this.numerify().value + what.numerify().value).setContext(this.context);
     }
 
@@ -143,6 +149,10 @@ export class BaseBuiltin {
         return new BooleanBuiltin(!this.castBool().value).setContext(this.context);
     }
 
+    castStr (): StringBuiltin {
+        return new StringBuiltin("");
+    }
+
 }
 
 export class NullBuiltin extends BaseBuiltin implements Builtin {
@@ -155,6 +165,10 @@ export class NullBuiltin extends BaseBuiltin implements Builtin {
 
     castBool (): BooleanBuiltin {
         return new BooleanBuiltin(false).setContext(this.context);
+    }
+
+    castStr (): StringBuiltin {
+        return new StringBuiltin("null");
     }
 
 }
@@ -176,6 +190,10 @@ export class NumberBuiltin extends BaseBuiltin implements Builtin {
         return new BooleanBuiltin(this.value != 0).setContext(this.context);
     }
 
+    castStr (): StringBuiltin {
+        return new StringBuiltin(this.value.toString());
+    }
+
 }
 
 export class BooleanBuiltin extends BaseBuiltin implements Builtin {
@@ -193,6 +211,35 @@ export class BooleanBuiltin extends BaseBuiltin implements Builtin {
 
     castBool (): BooleanBuiltin {
         return new BooleanBuiltin(this.value).setContext(this.context);
+    }
+
+    castStr (): StringBuiltin {
+        return new StringBuiltin(this.value ? "true" : "false");
+    }
+
+}
+
+export class StringBuiltin extends BaseBuiltin implements Builtin {
+
+    value: string;
+
+    constructor (value: string) {
+        super();
+        this.value = value;
+    }
+
+    numerify (): NumberBuiltin {
+        // if string is empty returns 0, otherwise 1
+        return new NumberBuiltin(Math.min(this.value.length, 1)).setContext(this.context);
+    }
+
+    castBool (): BooleanBuiltin {
+        // if string is empty return false, otherwise true
+        return new BooleanBuiltin(this.value != "").setContext(this.context);
+    }
+
+    castStr (): StringBuiltin {
+        return new StringBuiltin(this.value);
     }
 
 }

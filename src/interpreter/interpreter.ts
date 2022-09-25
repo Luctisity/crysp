@@ -6,9 +6,9 @@ import {
     TryCatchNode, UnaryOpNode, VarAssignNode, VarDeclareNode, WhileNode
 } from "../parser/nodes";
 import { h, RTERROR_ALREADY_DECLARED, RTERROR_NOT_DEFINED } from "../strings";
-import { BaseBuiltin, BooleanBuiltin, BuiltinOrErr, NullBuiltin, NumberBuiltin } from "./builtins";
+import { BaseBuiltin, BooleanBuiltin, BuiltinOrErr, NullBuiltin, NumberBuiltin, StringBuiltin } from "./builtins";
 import Context from "./context";
-import { getBooleanValue, isBoolean, isErr, isNumber, isVariable, matchKeyword } from "./util";
+import { getBooleanValue, isBoolean, isErr, isNumber, isString, isVariable, matchKeyword } from "./util";
 import VarStore from "./varStore";
 
 const BINARYOP_MAP: any = {
@@ -73,6 +73,10 @@ export default class Interpreter {
         // @KEYWORD:true | @KEYWORD:false => boolean builtin
         else if (isBoolean(node.token))
             builtin = new BooleanBuiltin(getBooleanValue(node.token));
+
+        // string token => string builtin
+        else if (isString(node.token))
+            builtin = new StringBuiltin(node.token.value);
 
         // @IDENTIFIER => variable access
         else if (isVariable(node.token)) {
