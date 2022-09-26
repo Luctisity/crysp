@@ -6,7 +6,7 @@ export type VarDict = {
 
 export default class VarStore {
 
-    vars: VarDict = {};
+    vars: VarDict = Object.assign(Object.create(null), {});
     parent?: VarStore;
 
     constructor (parent?: VarStore) {
