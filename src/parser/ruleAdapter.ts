@@ -1,9 +1,10 @@
 import { SyntaxErrorException } from "../classes/exception";
 import { PositionRange } from "../classes/position";
-import { ATOMS, SYMBOLS, TOKEN_IDENTIFIER, TOKEN_KEYWORD } from "../lexer/constants";
+import { ATOMS, SYMBOLS, TOKEN_FLOAT, TOKEN_IDENTIFIER, TOKEN_INT, TOKEN_KEYWORD, TOKEN_STRING } from "../lexer/constants";
 import Token from "../lexer/token";
 import { ERROR_UNEXP_TOKEN, h } from "../strings";
-import { BaseNode, BlockNode, CasesNode, NODE_INPUT_NODES, NODE_MAP } from "./nodes";
+import { AtomNode, BlockNode, CasesNode, NODES, NODE_INPUT_NODES } from "./nodes";
+import grammarRules from "./grammarRules.json";
 
 export type Rule = string[][];
 
@@ -34,52 +35,43 @@ export default class ParserRuleAdapter {
         return ruleData[variation][step] == "*";
     }
 
-    getCorrespondingNode (nodes: any[], isBlock: boolean = false, range?: PositionRange) {
+    getCorrespondingNode (nodes: any[], ruleNode: string, isBlock: boolean = false, range?: PositionRange) {
         // if is block, just create a new BlockNode
         if (isBlock) return new BlockNode(...nodes).setPos(range);
+        let r;
 
-        // get the desired node from the node map based on the string representation
-        let r = this.getNodeMapEntry(nodes);
-
-        // if the result is the "pass" keyword, pass the first node from the parameter, otherwise create a new node
-        if (r == 'pass') {
+        // if the node data matches an atom, create an Atom node
+        if (this.isAtom(nodes)) {
+            r = AtomNode;
+        }
+        // if the result is the "pass" keyword or the nodes list contains just one node
+        // pass the first node from the parameter
+        else if (ruleNode == 'pass' || nodes.length == 1) {
             if (nodes.length == 1) return nodes[0];
             else return new BlockNode(...nodes).setPos(range);
         }
-        if (r === true)  return true;
+        // otherwise, find the node using the ruleNode string
+        else r = NODES[ruleNode];
+
         return r ? new r(...nodes).setPos(range) : null;
     }
 
-    getNodeMapEntry (nodes: any[]) {
-        // this function is extremely hard to explain
-        // but basically, it checks against every entry in NODE_MAP
-        // to see if the given nodes list matches with it
-        // returns that entry, if found
+    isAtom (nodes: any[]) {
+        // an atom must only contain one node and it has to be a token
+        if (nodes.length > 1) return false;
+        if (!(nodes[0] instanceof Token)) return false;
 
-        let entry: any;
-        Object.keys(NODE_MAP).forEach(k => {
-            let pass = true;
-            const spl = k.split(',');
+        // a token must either be numeric, string, identifier or a "true"/"false"/"null" keyword
+        if ([TOKEN_INT, TOKEN_FLOAT, TOKEN_STRING, TOKEN_IDENTIFIER].includes(nodes[0].type)) return true;
+        if (nodes[0].type == TOKEN_KEYWORD && ['true', 'false', 'null'].includes(nodes[0].value)) return true;
 
-            spl.forEach((elem, index) => {
-                if (!pass) return;
+        return false;
+    }
 
-                const elemPrf = elem[0];
-                const elemSpl = elem.slice(1).split(':');
-
-                if (elemPrf == '@' && !(nodes[index] instanceof Token))    return pass = false;
-                if (elemPrf == '%'  && !(nodes[index] instanceof BaseNode)) return pass = false;
-
-                if (elemSpl[0] && nodes[index].type  != elemSpl[0]) return pass = false;
-                if (elemSpl[1] && nodes[index].value != elemSpl[1]) return pass = false;
-
-                return;
-            });
-
-            if (pass) entry = k;
-        });
-
-        return (NODE_MAP as any)[entry];
+    getRuleNode (name: string) {
+        const ruleDataFull = [...(grammarRules as any)[name]];
+        const ruleNode: string = ruleDataFull.pop();
+        return ruleNode;
     }
 
     getToken (s: string) {

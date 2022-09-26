@@ -405,52 +405,27 @@ export class ThrowNode extends BaseNode {
 
 }
 
-// this system needs to be redone at some point
-
-export const NODE_MAP = {
-    '@INT':            AtomNode, // number values
-    '@FLOAT':          AtomNode, // number values
-    '@STRING':         AtomNode, // string values
-    '@KEYWORD:true':   AtomNode, // boolean values
-    '@KEYWORD:false':  AtomNode, // boolean values
-    '@KEYWORD:null':   AtomNode, // null value
-    '@IDENTIFIER':     AtomNode, // variable access
-
-    '%':     'pass',               // signle nodes
-    '%,@,%': BinaryOpNode,         // binary operators
-    '%,@BLOCKSEP,%': BlockNode,    // node + block separation token + node is a block, not a binary operator
-    '@,%':   UnaryOpNode,          // unary operators
-    '@KEYWORD,%':   'pass',
-    '@KEYWORD:not,%': UnaryOpNode, // unary operators
-    '%,@KEYWORD,%': 'pass',
-    '%,@KEYWORD:is,%': BinaryOpNode,
-    '%,@KEYWORD:and,%': BinaryOpNode,
-    '%,@KEYWORD:or,%': BinaryOpNode,
-
-    '@KEYWORD:if,%,%': IfNode,   // if
-    '@KEYWORD:else,%': ElseNode, // else
-
-    '@KEYWORD:switch,%,%': SwitchNode,      // switch
-    '@KEYWORD:case,%':     CasesNode,       // switch cases
-    '@KEYWORD:default,%':  DefaultCaseNode, // switch default case
-
-    '@KEYWORD:while,%,%':             WhileNode,    // while
-    '@KEYWORD:do,%,@KEYWORD:while,%': DoWhileNode,  // do while
-    '@KEYWORD:repeat,%,%':            RepeatNode,   // repeat
-
-    '@IDENTIFIER,@,%':          VarAssignNode,  // var assignment node
-    '@IDENTIFIER,@INCR':        VarAssignNode,  // var assignment node
-    '@IDENTIFIER,@DECR':        VarAssignNode,  // var assignment node
-    '@KEYWORD:let,@IDENTIFIER': VarDeclareNode, // variable declaration
-    
-    '@KEYWORD:return':   ReturnNode,   // return command
-    '@KEYWORD:break':    BreakNode,    // break command
-    '@KEYWORD:continue': ContinueNode, // continue command
-    '@KEYWORD:delete,%': DeleteNode,   // delete command
-    '@KEYWORD:throw,%':  ThrowNode,    // throw command
-
-    '@KEYWORD:try,%,@KEYWORD:catch': TryCatchNode, // try-catch
-
+export const NODES: any = {
+    'atom':        AtomNode,
+    'binaryOp':    BinaryOpNode,
+    'unaryOp':     UnaryOpNode,
+    'block':       BlockNode,
+    'if':          IfNode,
+    'else':        ElseNode,
+    'switch':      SwitchNode,
+    'defaultCase': DefaultCaseNode,
+    'cases':       CasesNode,
+    'while':       WhileNode,
+    'dowhile':     DoWhileNode,
+    'repeat':      RepeatNode,
+    'trycatch':    TryCatchNode,
+    'varDeclare':  VarDeclareNode,
+    'varAssign':   VarAssignNode,
+    'return':      ReturnNode,
+    'break':       BreakNode,
+    'continue':    ContinueNode,
+    'delete':      DeleteNode,
+    'throw':       ThrowNode
 }
 
 export const NODE_INPUT_NODES = [

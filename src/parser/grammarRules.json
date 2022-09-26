@@ -2,7 +2,8 @@
 
     "block": [
         ["$command", "$blockSep", "**"],
-        ["$command"]
+        ["$command"],
+        "block"
     ],
 
     "command": [
@@ -20,7 +21,8 @@
         ["$break"],
         ["$continue"],
         ["$delete"],
-        ["$throw"]
+        ["$throw"],
+        "pass"
     ],
 
     "if": [
@@ -28,47 +30,57 @@
         ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
         ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "$command", "@BLOCKSEP&", "$else"],
         ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "$command", "$else"],
-        ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "$command"]
+        ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "$command"],
+        "if"
     ],
     "else": [
         ["@KEYWORD:else", "@OCURLY&", "$block", "@CCURLY&"],
-        ["@KEYWORD:else", "$command"]
+        ["@KEYWORD:else", "$command"],
+        "else"
     ],
 
     "switch": [
         ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$case", "$default", "@CCURLY&"],
         ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$case", "@CCURLY&"],
-        ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$default", "@CCURLY&"]
+        ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$default", "@CCURLY&"],
+        "switch"
     ],
     "case": [
         ["@KEYWORD:case", "$expr", "@COLON&", "$block", "**"],
-        ["@KEYWORD:case", "$expr", "@COLON&", "**"]
+        ["@KEYWORD:case", "$expr", "@COLON&", "**"],
+        "cases"
     ],
     "default": [
-        ["@KEYWORD:default", "@COLON&", "$block"]
+        ["@KEYWORD:default", "@COLON&", "$block"],
+        "defaultCase"
     ],
 
     "while": [
         ["@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&",  "@OCURLY&", "$block", "@CCURLY&"],
-        ["@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&", "$command"]
+        ["@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&", "$command"],
+        "while"
     ],
     "dowhile": [
         ["@KEYWORD:do", "@OCURLY&", "$block", "@CCURLY&", "@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&"],
-        ["@KEYWORD:do", "$command", "@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&"]
+        ["@KEYWORD:do", "$command", "@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&"],
+        "dowhile"
     ],
     "repeat": [
         ["@KEYWORD:repeat", "@OPAREN&", "$expr", "@CPAREN&",  "@OCURLY&", "$block", "@CCURLY&"],
-        ["@KEYWORD:repeat", "@OPAREN&", "$expr", "@CPAREN&", "$command"]
+        ["@KEYWORD:repeat", "@OPAREN&", "$expr", "@CPAREN&", "$command"],
+        "repeat"
     ],
 
     "trycatch": [
         ["@KEYWORD:try", "@OCURLY&", "$block", "@CCURLY&", "@KEYWORD:catch", "@OPAREN&", "@IDENTIFIER", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
-        ["@KEYWORD:try", "@OCURLY&", "$block", "@CCURLY&", "@KEYWORD:catch", "@OCURLY&", "$block", "@CCURLY&"]
+        ["@KEYWORD:try", "@OCURLY&", "$block", "@CCURLY&", "@KEYWORD:catch", "@OCURLY&", "$block", "@CCURLY&"],
+        "trycatch"
     ],
 
     "varDeclare": [
         ["@KEYWORD:let", "@IDENTIFIER", "@ASSIGN&", "$expr"],
-        ["@KEYWORD:let", "@IDENTIFIER"]
+        ["@KEYWORD:let", "@IDENTIFIER"],
+        "varDeclare"
     ],
     "varAssign": [
         ["@IDENTIFIER", "@ASSIGN", "$expr"],
@@ -79,19 +91,22 @@
         ["@IDENTIFIER", "@POWERBY", "$expr"],
         ["@IDENTIFIER", "@MODBY", "$expr"],
         ["@IDENTIFIER", "@INCR"],
-        ["@IDENTIFIER", "@DECR"]
+        ["@IDENTIFIER", "@DECR"],
+        "varAssign"
     ],
 
     "expr": [
         ["$varAssign"],
-        ["$logic"]
+        ["$logic"],
+        "binaryOp"
     ],
 
     "logic": [
         ["$compare", "$and", "$compare", "*"],
         ["$compare", "$or", "$compare", "*"],
         ["$compare", "$not", "$compare", "*"],
-        ["$compare"]
+        ["$compare"],
+        "binaryOp"
     ],
 
     "compare": [
@@ -101,46 +116,56 @@
         ["$arithm", "@LESS", "$arithm", "*"],
         ["$arithm", "@GREATEREQ", "$arithm", "*"],
         ["$arithm", "@LESSEQ", "$arithm", "*"],
-        ["$arithm"]
+        ["$arithm"],
+        "binaryOp"
     ],
 
     "arithm": [
         ["$term", "@ADD", "$term", "*"],
         ["$term", "@SUB", "$term", "*"],
-        ["$term"]
+        ["$term"],
+        "binaryOp"
     ],
     "term": [
         ["$factor", "@MUL", "$factor", "*"],
         ["$factor", "@DIV", "$factor", "*"],
         ["$factor", "@MOD", "$factor", "*"],
-        ["$factor"]
+        ["$factor"],
+        "binaryOp"
     ],
     "factor": [
         ["@ADD", "$factor"],
         ["@SUB", "$factor"],
         ["$not", "$factor"],
-        ["$power"]
+        ["$power"],
+        "unaryOp"
     ],
     "power": [
         ["$atom", "@POW", "$factor", "*"],
-        ["$atom"]
+        ["$atom"],
+        "binaryOp"
     ],
 
     "return": [
         ["@KEYWORD:return", "$expr"],
-        ["@KEYWORD:return"]
+        ["@KEYWORD:return"],
+        "return"
     ],
     "break": [
-        ["@KEYWORD:break"]
+        ["@KEYWORD:break"],
+        "break"
     ],
     "continue": [
-        ["@KEYWORD:continue"]
+        ["@KEYWORD:continue"],
+        "continue"
     ],
     "delete": [
-        ["@KEYWORD:delete", "$expr"]
+        ["@KEYWORD:delete", "$expr"],
+        "delete"
     ],
     "throw": [
-        ["@KEYWORD:throw", "$expr"]
+        ["@KEYWORD:throw", "$expr"],
+        "throw"
     ],
 
     "atom": [
@@ -151,30 +176,36 @@
         ["@KEYWORD:false"],
         ["@KEYWORD:null"],
         ["@IDENTIFIER"],
-        ["@OPAREN&", "$expr", "@CPAREN&"]
+        ["@OPAREN&", "$expr", "@CPAREN&"],
+        "pass"
     ],
 
     "and": [
         ["@AND"],
-        ["@KEYWORD:and"]
+        ["@KEYWORD:and"],
+        "pass"
     ],
     "or": [
         ["@OR"],
-        ["@KEYWORD:or"]
+        ["@KEYWORD:or"],
+        "pass"
     ],
     "not": [
         ["@NOT"],
-        ["@KEYWORD:not"]
+        ["@KEYWORD:not"],
+        "pass"
     ],
     "equals": [
         ["@EQUALS"],
-        ["@KEYWORD:is"]
+        ["@KEYWORD:is"],
+        "pass"
     ],
 
 
     "blockSep": [
         ["@BLOCKSEP"],
-        ["@NEWL"]
+        ["@NEWL"],
+        "pass"
     ]
 
 }

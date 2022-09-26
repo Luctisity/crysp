@@ -10,5 +10,6 @@ x add error handling
 
 [Interpreter]
 
-- add string types and related operations
+x add string types and related operations
+x remake the corresponding node find system
 - switch case
