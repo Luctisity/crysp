@@ -7,6 +7,9 @@ x add an option for variable children count node (block nodes)
 x automatic semicolon placement at the end of block statements
 x add error handling
 - generalize multi-child node types (blocks, switch cases, etc.)
+- functions
+- fix allowing empty expressions in block/expr fields (for example after ifs)
+- allow empty blocks and empty expressions in parethesis
 
 [Interpreter]
 

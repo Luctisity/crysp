@@ -336,6 +336,42 @@ export class VarAssignNode extends BaseNode {
 
 }
 
+export class FuncDeclareNode extends BaseNode {
+
+    type = 'funcDeclare';
+
+    name:  Token;
+    expr:  BaseNode;
+
+    constructor (_keyword: Token, name: Token, expr: BaseNode) {
+        super();
+        this.name  = name;
+        this.expr  = expr;
+    }
+
+    toString () {
+        return `[func ${this.name}() => ${this.expr}]`;
+    }
+
+}
+
+export class FuncCallNode extends BaseNode {
+
+    type = 'funcCall';
+
+    name: Token;
+
+    constructor (name: Token) {
+        super();
+        this.name  = name;
+    }
+
+    toString () {
+        return `${this.name}()`;
+    }
+
+}
+
 export class ReturnNode extends BaseNode {
 
     type = 'return';
@@ -410,17 +446,23 @@ export const NODES: any = {
     'binaryOp':    BinaryOpNode,
     'unaryOp':     UnaryOpNode,
     'block':       BlockNode,
+
     'if':          IfNode,
     'else':        ElseNode,
     'switch':      SwitchNode,
     'defaultCase': DefaultCaseNode,
     'cases':       CasesNode,
+
     'while':       WhileNode,
     'dowhile':     DoWhileNode,
     'repeat':      RepeatNode,
     'trycatch':    TryCatchNode,
+
     'varDeclare':  VarDeclareNode,
     'varAssign':   VarAssignNode,
+    'funcDeclare': FuncDeclareNode,
+    'funcCall':    FuncCallNode,
+    
     'return':      ReturnNode,
     'break':       BreakNode,
     'continue':    ContinueNode,

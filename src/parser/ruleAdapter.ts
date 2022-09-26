@@ -1,9 +1,9 @@
 import { SyntaxErrorException } from "../classes/exception";
 import { PositionRange } from "../classes/position";
-import { ATOMS, SYMBOLS, TOKEN_FLOAT, TOKEN_IDENTIFIER, TOKEN_INT, TOKEN_KEYWORD, TOKEN_STRING } from "../lexer/constants";
+import { ATOMS, SYMBOLS, TOKEN_CPAREN, TOKEN_FLOAT, TOKEN_IDENTIFIER, TOKEN_INT, TOKEN_KEYWORD, TOKEN_OPAREN, TOKEN_STRING } from "../lexer/constants";
 import Token from "../lexer/token";
 import { ERROR_UNEXP_TOKEN, h } from "../strings";
-import { AtomNode, BlockNode, CasesNode, NODES, NODE_INPUT_NODES } from "./nodes";
+import { AtomNode, BlockNode, CasesNode, FuncCallNode, NODES, NODE_INPUT_NODES } from "./nodes";
 import grammarRules from "./grammarRules.json";
 
 export type Rule = string[][];
@@ -44,6 +44,10 @@ export default class ParserRuleAdapter {
         if (this.isAtom(nodes)) {
             r = AtomNode;
         }
+        // if the node data matches a function call, create a FuncCall node
+        else if (this.isFunctionCall(nodes)) {
+            r = FuncCallNode;
+        }
         // if the result is the "pass" keyword or the nodes list contains just one node
         // pass the first node from the parameter
         else if (ruleNode == 'pass' || nodes.length == 1) {
@@ -66,6 +70,21 @@ export default class ParserRuleAdapter {
         if (nodes[0].type == TOKEN_KEYWORD && ['true', 'false', 'null'].includes(nodes[0].value)) return true;
 
         return false;
+    }
+
+    isFunctionCall (nodes: any[]) {
+        // if a node list contains non-tokens or just one token, not a function call
+        if (nodes.length < 2) return false;
+        if (nodes.filter(f => !(f instanceof Token)).length) return false;
+
+        // a function call must start with an idetifier
+        if (nodes[0].type != TOKEN_IDENTIFIER) return false;
+
+        // a function call must have parenthesis after identifier
+        if (nodes[1].type != TOKEN_OPAREN) return false;
+        if (nodes[2].type != TOKEN_CPAREN) return false;
+
+        return true;
     }
 
     getRuleNode (name: string) {

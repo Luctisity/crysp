@@ -1,5 +1,6 @@
 import { RuntimeException } from "../classes/exception";
 import { PositionRange } from "../classes/position";
+import { BaseNode } from "../parser/nodes";
 import { RTERROR_DIV_ZERO } from "../strings";
 import Context from "./context";
 
@@ -8,6 +9,7 @@ export type BuiltinOrErr = Builtin | RuntimeException;
 interface Builtin {
 
     value: any;
+    isFunc: boolean;
 
     set       (what: BaseBuiltin): BaseBuiltin;
     increment (): Builtin;
@@ -40,6 +42,7 @@ interface Builtin {
 export class BaseBuiltin {
 
     value:    any;
+    isFunc =  false;
     range?:   PositionRange;
     context?: Context;
 
@@ -240,6 +243,32 @@ export class StringBuiltin extends BaseBuiltin implements Builtin {
 
     castStr (): StringBuiltin {
         return new StringBuiltin(this.value);
+    }
+
+}
+
+export class FuncBuiltin extends BaseBuiltin implements Builtin {
+
+    value: BaseNode;
+    name:  string;
+    isFunc = true;
+
+    constructor (value: BaseNode, name?: string) {
+        super();
+        this.value = value;
+        this.name  = name || "anonymous";
+    }
+
+    numerify (): NumberBuiltin {
+        return new NumberBuiltin(1).setContext(this.context);
+    }
+
+    castBool (): BooleanBuiltin {
+        return new BooleanBuiltin(true).setContext(this.context);
+    }
+
+    castStr (): StringBuiltin {
+        return new StringBuiltin(`[Function:${this.name}]`);
     }
 
 }
