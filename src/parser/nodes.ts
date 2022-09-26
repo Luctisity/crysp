@@ -388,7 +388,6 @@ export class FuncCallNode extends BaseNode {
         super();
         this.name = name;
         this.args = args[0] || undefined;
-        console.log(this);
     }
 
     toString () {

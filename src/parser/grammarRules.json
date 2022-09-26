@@ -32,6 +32,7 @@
         ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "$command", "@BLOCKSEP&", "$else"],
         ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "$command", "$else"],
         ["@KEYWORD:if", "@OPAREN&", "$expr", "@CPAREN&", "$command"],
+
         "if"
     ],
     "else": [
@@ -44,6 +45,7 @@
         ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$case", "$default", "@CCURLY&"],
         ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$case", "@CCURLY&"],
         ["@KEYWORD:switch", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$default", "@CCURLY&"],
+
         "switch"
     ],
     "case": [
@@ -59,16 +61,19 @@
     "while": [
         ["@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&",  "@OCURLY&", "$block", "@CCURLY&"],
         ["@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&", "$command"],
+
         "while"
     ],
     "dowhile": [
         ["@KEYWORD:do", "@OCURLY&", "$block", "@CCURLY&", "@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&"],
         ["@KEYWORD:do", "$command", "@KEYWORD:while", "@OPAREN&", "$expr", "@CPAREN&"],
+
         "dowhile"
     ],
     "repeat": [
-        ["@KEYWORD:repeat", "@OPAREN&", "$expr", "@CPAREN&",  "@OCURLY&", "$block", "@CCURLY&"],
+        ["@KEYWORD:repeat", "@OPAREN&", "$expr", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
         ["@KEYWORD:repeat", "@OPAREN&", "$expr", "@CPAREN&", "$command"],
+
         "repeat"
     ],
 
@@ -99,16 +104,16 @@
     "funcDeclare": [
         ["@KEYWORD:func", "@IDENTIFIER", "@OPAREN&", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
         ["@KEYWORD:func", "@IDENTIFIER", "@OPAREN&", "$funcDeclareParams", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
-        ["@KEYWORD:func", "@IDENTIFIER", "@OPAREN&", "@CPAREN&", "$expr"],
-        ["@KEYWORD:func", "@IDENTIFIER", "@OPAREN&", "$funcDeclareParams", "@CPAREN&", "$expr"],
+        ["@KEYWORD:func", "@IDENTIFIER", "@OPAREN&", "@CPAREN&", "$command"],
+        ["@KEYWORD:func", "@IDENTIFIER", "@OPAREN&", "$funcDeclareParams", "@CPAREN&", "$command"],
         "funcDeclare"
     ],
 
     "anonymousFuncDeclare": [
         ["@KEYWORD:func", "@OPAREN&", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
         ["@KEYWORD:func", "@OPAREN&", "$funcDeclareParams", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
-        ["@KEYWORD:func", "@OPAREN&", "@CPAREN&", "$expr"],
-        ["@KEYWORD:func", "@OPAREN&", "$funcDeclareParams", "@CPAREN&", "$expr"],
+        ["@KEYWORD:func", "@OPAREN&", "@CPAREN&", "$command"],
+        ["@KEYWORD:func", "@OPAREN&", "$funcDeclareParams", "@CPAREN&", "$command"],
         "anonymousFuncDeclare"
     ],
 
