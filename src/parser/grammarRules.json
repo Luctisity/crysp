@@ -98,12 +98,34 @@
 
     "funcDeclare": [
         ["@KEYWORD:func", "@IDENTIFIER", "@OPAREN&", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
+        ["@KEYWORD:func", "@IDENTIFIER", "@OPAREN&", "$funcDeclareParams", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
         ["@KEYWORD:func", "@IDENTIFIER", "@OPAREN&", "@CPAREN&", "$expr"],
+        ["@KEYWORD:func", "@IDENTIFIER", "@OPAREN&", "$funcDeclareParams", "@CPAREN&", "$expr"],
         "funcDeclare"
+    ],
+
+    "anonymousFuncDeclare": [
+        ["@KEYWORD:func", "@OPAREN&", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
+        ["@KEYWORD:func", "@OPAREN&", "$funcDeclareParams", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
+        ["@KEYWORD:func", "@OPAREN&", "@CPAREN&", "$expr"],
+        ["@KEYWORD:func", "@OPAREN&", "$funcDeclareParams", "@CPAREN&", "$expr"],
+        "anonymousFuncDeclare"
+    ],
+
+    "funcDeclareParams": [
+        ["@IDENTIFIER", "@SEP&", "**"],
+        "funcParams"
+    ],
+
+    "funcArgs": [
+        ["$expr", "@SEP&", "**"],
+        ["$expr"],
+        "funcArgs"
     ],
 
     "expr": [
         ["$varAssign"],
+        ["$anonymousFuncDeclare"],
         ["$logic"],
         "binaryOp"
     ],
@@ -182,9 +204,15 @@
         ["@KEYWORD:true"],
         ["@KEYWORD:false"],
         ["@KEYWORD:null"],
-        ["@IDENTIFIER", "@OPAREN", "@CPAREN"],
+        ["$funcCall"],
         ["@IDENTIFIER"],
         ["@OPAREN&", "$expr", "@CPAREN&"],
+        "pass"
+    ],
+
+    "funcCall": [
+        ["@IDENTIFIER", "@OPAREN", "@CPAREN"],
+        ["@IDENTIFIER", "@OPAREN", "$funcArgs", "@CPAREN"],
         "pass"
     ],
 

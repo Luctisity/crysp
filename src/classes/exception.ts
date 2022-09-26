@@ -58,7 +58,7 @@ export class Exception {
         let ctx   = this.context?.lastFunction();
 
         while (ctx) {
-            s = `\nat ${ctx.name} (${pos ? pos.line : 1}:${pos ? pos.col : 1})` + s;
+            s += `\nat ${ctx.name} (${pos ? pos.line : 1}:${pos ? pos.col : 1})`;
             pos = ctx.parentEntryPos;
             ctx = ctx.parent?.lastFunction();
         }

@@ -1,11 +1,12 @@
 import { RuntimeException } from "../classes/exception";
 import { 
+    AnonymousFuncDeclareNode,
     AtomNode, BaseNode, BinaryOpNode, BlockNode, BreakNode, 
     CasesNode, ContinueNode, DefaultCaseNode, DeleteNode, DoWhileNode,
-    ElseNode, FuncCallNode, FuncDeclareNode, IfNode, RepeatNode, ReturnNode, SwitchNode, ThrowNode, 
+    ElseNode, FuncArgsNode, FuncCallNode, FuncDeclareNode, IfNode, RepeatNode, ReturnNode, SwitchNode, ThrowNode, 
     TryCatchNode, UnaryOpNode, VarAssignNode, VarDeclareNode, WhileNode
 } from "../parser/nodes";
-import { h, RTERROR_ALREADY_DECLARED, RTERROR_NOT_A_FUNC, RTERROR_NOT_DEFINED } from "../strings";
+import { h, RTERROR_ALREADY_DECLARED, RTERROR_NOT_A_FUNC, RTERROR_NOT_DEFINED, RTERROR_NOT_ENOUGH_ARGS } from "../strings";
 import { BaseBuiltin, BooleanBuiltin, BuiltinOrErr, FuncBuiltin, NullBuiltin, NumberBuiltin, StringBuiltin } from "./builtins";
 import Context from "./context";
 import { getBooleanValue, isBoolean, isErr, isNumber, isString, isVariable, matchKeyword } from "./util";
@@ -143,12 +144,19 @@ export default class Interpreter {
         const children: BaseBuiltin[] = [];
         let err: any;
 
-        node.nodes.forEach(child => {
+        // hoist function delcarations
+        const nodesHoist = node.nodes.filter(f => f.type == 'funcDeclare');
+        const nodesRest  = node.nodes.filter(f => f.type != 'funcDeclare');   
+
+        const iter = (child: BaseNode) => {
             if (err) return;
             result = this.pass(child, blockContext);
             children.push(result);
             if (isErr(result)) err = result;
-        });
+        }
+
+        nodesHoist.forEach(iter);
+        nodesRest.forEach(iter);
 
         return err || result;
     }
@@ -274,14 +282,16 @@ export default class Interpreter {
     }
 
     passFuncDeclare = (node: FuncDeclareNode, context: Context) => {
-        const name = node.name.value;
+        const name = node.name?.value;
 
         if (context.varStore?.hasHere(name)) return new RuntimeException(h(RTERROR_ALREADY_DECLARED, name), node.range, context);
 
-        const value = node.expr;
+        const value  = node.expr;
+        const params = node.args?.map(m => m.value || m.token?.value);
+        const func   = new FuncBuiltin(value, name, params);
+        context.varStore?.set(name, func);
 
-        context.varStore?.set(name, new FuncBuiltin(value, name));
-        return this.passNothing();
+        return name ? this.passNothing() : func;
     }
 
     passFuncCall = (node: FuncCallNode, context: Context) => {
@@ -290,10 +300,40 @@ export default class Interpreter {
 
         // if the var is not defined or is not a function, throw error
         if (!value)        return new RuntimeException(h(RTERROR_NOT_DEFINED, name), node.range, context);
-        if (!value.isFunc) return new RuntimeException(h(RTERROR_NOT_A_FUNC, name),  node.range, context);
+        if (!value.isFunc) return new RuntimeException(h(RTERROR_NOT_A_FUNC,  name), node.range, context);
+
+        // args can come in different types for some reason
+        let args: BaseNode[] = [];
+        if (node.args instanceof FuncArgsNode) args = node.args.nodes;
+        else if (node.args) args = [node.args];
+
+        const params = (value as FuncBuiltin).params;
+
+        // if the number of provided args is less than the number of expected params, error
+        if (args.length < params.length) return new RuntimeException(h(RTERROR_NOT_ENOUGH_ARGS, name), node.range, context);
+
+        // create separate function varstore
+        const funcVarStore = new VarStore(context.varStore);
+
+        // define all arguments as variables in the func's scope
+        let err: any;
+        args.forEach((arg, index) => {
+            if (err) return;
+
+            const paramName = params[index];
+            if (!paramName) return;
+
+            let result = this.pass(arg, context);
+            if (isErr(result)) {
+                err = result;
+                return;
+            }
+
+            funcVarStore.set(paramName, result);
+        });
+        if (err) return err;
 
         // create separate function context
-        const funcVarStore = new VarStore(context.varStore);
         const funcContext  = new Context(
             (value as FuncBuiltin).name, context, node.range?.start, true
         ).setVarStore(funcVarStore);
@@ -350,6 +390,7 @@ export default class Interpreter {
         'varDeclare':  this.passVarDeclare,
         'varAssign':   this.passVarAssign,
         'funcDeclare': this.passFuncDeclare,
+        'anonymousFuncDeclare': this.passFuncDeclare,
         'funcCall':    this.passFuncCall,
 
         'return':      this.passReturn,

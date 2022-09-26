@@ -193,7 +193,7 @@ export default class Parser {
                 // if returned an exception, pass it on
                 if (nodeData instanceof Exception) return nodeData;
 
-                if (!nodeData.length) {
+                if (!nodeData.length && ruleName != 'block') {
                     tryNextVariation();
                     continue;
                 }
@@ -211,8 +211,10 @@ export default class Parser {
                 // (to avoid nested blocks)
                 if (isBlock) {
                     // special hardcoded (sorry) logic for the case rule
-                    if (name == 'case') nodes.push(targetNode);
-                    else                nodes.push(...targetNode.nodes);
+                    if (name == 'case')
+                        nodes.push(targetNode);
+                    else
+                        nodes.push(...targetNode.nodes);
                 }
 
                 // otherwise just push the node

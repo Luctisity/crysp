@@ -75,14 +75,14 @@ export default class ParserRuleAdapter {
     isFunctionCall (nodes: any[]) {
         // if a node list contains non-tokens or just one token, not a function call
         if (nodes.length < 2) return false;
-        if (nodes.filter(f => !(f instanceof Token)).length) return false;
+        if (!(nodes[0] instanceof Token)) return false;
 
         // a function call must start with an idetifier
         if (nodes[0].type != TOKEN_IDENTIFIER) return false;
 
         // a function call must have parenthesis after identifier
         if (nodes[1].type != TOKEN_OPAREN) return false;
-        if (nodes[2].type != TOKEN_CPAREN) return false;
+        if (nodes[nodes.length-1].type != TOKEN_CPAREN) return false;
 
         return true;
     }

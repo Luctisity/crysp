@@ -340,17 +340,38 @@ export class FuncDeclareNode extends BaseNode {
 
     type = 'funcDeclare';
 
-    name:  Token;
+    name?: Token;
+    args?: any[] = [];
     expr:  BaseNode;
 
-    constructor (_keyword: Token, name: Token, expr: BaseNode) {
+    constructor (_keyword: Token, ...args: any[]) {
         super();
-        this.name  = name;
-        this.expr  = expr;
+        if (args[0] instanceof Token) this.name = args.shift();
+        this.expr = args.pop();
+        this.args = args;
     }
 
     toString () {
-        return `[func ${this.name}() => ${this.expr}]`;
+        return `[func ${this.name} (${this.args}) => ${this.expr}]`;
+    }
+
+}
+
+export class AnonymousFuncDeclareNode extends BaseNode {
+
+    type = 'anonymousFuncDeclare';
+
+    args?: any[] = [];
+    expr:  BaseNode;
+
+    constructor (_keyword: Token, ...args: any[]) {
+        super();
+        this.expr = args.pop();
+        this.args = args;
+    }
+
+    toString () {
+        return `[func (${this.args}) => ${this.expr}]`;
     }
 
 }
@@ -359,15 +380,32 @@ export class FuncCallNode extends BaseNode {
 
     type = 'funcCall';
 
-    name: Token;
+    name:  Token;
+    args?: BaseNode;
 
-    constructor (name: Token) {
+    constructor (name: Token, ...args: BaseNode[]) {
+        args = args.slice(1, -1);
         super();
-        this.name  = name;
+        this.name = name;
+        this.args = args[0] || undefined;
+        console.log(this);
     }
 
     toString () {
         return `${this.name}()`;
+    }
+
+}
+
+export class FuncArgsNode extends BaseNode {
+
+    type = 'funcArgs';
+
+    nodes: BaseNode[] = [];
+
+    constructor (...nodes: BaseNode[]) {
+        super();
+        this.nodes = nodes;
     }
 
 }
@@ -461,7 +499,9 @@ export const NODES: any = {
     'varDeclare':  VarDeclareNode,
     'varAssign':   VarAssignNode,
     'funcDeclare': FuncDeclareNode,
+    'anonymousFuncDeclare': AnonymousFuncDeclareNode,
     'funcCall':    FuncCallNode,
+    'funcArgs':    FuncArgsNode,
     
     'return':      ReturnNode,
     'break':       BreakNode,
