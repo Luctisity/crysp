@@ -17,3 +17,6 @@ x allow empty blocks
 x add string types and related operations
 x remake the corresponding node find system
 - switch case
+- fix anonymous functions (they appear as blocks)
+- add support for one line functions without return
+x fix return statements working in one liners not in functions

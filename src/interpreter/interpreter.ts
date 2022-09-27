@@ -209,10 +209,10 @@ export default class Interpreter {
     loopIteration = (node: any, loopContext: Context, lastBlock: any) => {
         let b = this.pass(node.block, loopContext);
 
-        if (isBlockBreak(b)) {
+        if (isBlockBreak(b, BlockBreakType.LOOP) || isBlockBreak(b, BlockBreakType.ITERATION)) {
             if (isBlockBreak(b, BlockBreakType.LOOP)) return false;
         }
-        else lastBlock = b;
+        else if (!isErr(lastBlock)) lastBlock = b;
 
         return lastBlock;
     }

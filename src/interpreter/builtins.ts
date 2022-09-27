@@ -1,7 +1,7 @@
 import { RuntimeException } from "../classes/exception";
 import { PositionRange } from "../classes/position";
 import { BaseNode } from "../parser/nodes";
-import { RTERROR_DIV_ZERO } from "../strings";
+import { BUILTIN_FUNCTION_ANON, BUILTIN_FUNCTION_NAME, RTERROR_DIV_ZERO } from "../strings";
 import BlockBreak from "./blockBreak";
 import Context from "./context";
 
@@ -258,7 +258,7 @@ export class FuncBuiltin extends BaseBuiltin implements Builtin {
     constructor (value: BaseNode, name?: string, params?: string[]) {
         super();
         this.value = value;
-        this.name  = name || "anonymous";
+        this.name  = name || BUILTIN_FUNCTION_ANON;
         this.params = params || this.params;
     }
 
@@ -271,7 +271,7 @@ export class FuncBuiltin extends BaseBuiltin implements Builtin {
     }
 
     castStr (): StringBuiltin {
-        return new StringBuiltin(`[Function:${this.name}]`);
+        return new StringBuiltin(`[${BUILTIN_FUNCTION_NAME}:${this.name}]`);
     }
 
 }

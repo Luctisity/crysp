@@ -14,6 +14,9 @@ export const RTERROR_ILLEGAL_BLOCK_BREAK = [
     "Cannot continue outside of a loop iteration"
 ];
 
+export const BUILTIN_FUNCTION_NAME = "Function";
+export const BUILTIN_FUNCTION_ANON = "anonymous";
+
 export function h (str: string, repl: string) {
     return str.replaceAll("$", repl);
 }

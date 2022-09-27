@@ -92,7 +92,7 @@ export default class ParserRuleAdapter {
     }
 
     getSingleNode (nodes: any[]) {
-        if (nodes[0].type != TOKEN_KEYWORD) return false;
+        if (!nodes[0] || nodes[0].type != TOKEN_KEYWORD) return false;
 
         switch (nodes[0].value) {
             case "return":   return ReturnNode;
