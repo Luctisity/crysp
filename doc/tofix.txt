@@ -10,7 +10,6 @@ x add error handling
 x functions
 - fix allowing empty expressions in block/expr fields (for example after ifs)
 x allow empty blocks 
-- allow empty expressions in parethesis
 - add an option to call expressions as functions (example: myFunc()(), (myFunc())(), etc.)
 
 [Interpreter]

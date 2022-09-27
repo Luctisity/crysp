@@ -277,9 +277,9 @@ export class TryCatchNode extends BaseNode {
 
     tryBlock:    BaseNode;
     catchBlock:  BaseNode;
-    errorParam?: BaseNode;
+    errorParam?: Token;
 
-    constructor (_try: Token, tryBlock: BaseNode, _catch: Token, errorParam: BaseNode, catchBlock?: BaseNode) {
+    constructor (_try: Token, tryBlock: BaseNode, _catch: Token, errorParam: any, catchBlock?: BaseNode) {
         super();
         this.tryBlock  = tryBlock;
         if (catchBlock) {
@@ -511,6 +511,5 @@ export const NODES: any = {
 
 export const NODE_INPUT_NODES = [
     'left', 'right', 'node', 'condIf', 'thenIf', 'thenElse', 
-    'block', 'cond', 'cases', 'defcase', 'tryBlock', 'catchBlock', 
-    'errorParam', 'expr'
+    'block', 'cond', 'cases', 'defcase', 'tryBlock', 'catchBlock', 'expr'
 ]

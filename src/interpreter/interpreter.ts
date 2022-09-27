@@ -1,4 +1,4 @@
-import { RuntimeException } from "../classes/exception";
+import { Exception, RuntimeException } from "../classes/exception";
 import { 
     AnonymousFuncDeclareNode,
     AtomNode, BaseNode, BinaryOpNode, BlockNode, BreakNode, 
@@ -236,9 +236,27 @@ export default class Interpreter {
     }
 
     passTryCatch = (node: TryCatchNode, context: Context) => {
-        const childTry   = this.pass(node.tryBlock, context);
-        const childCatch = this.pass(node.catchBlock, context);
-        const errorParam = node.errorParam ? this.pass(node.errorParam, context) : null;
+        const childTry: any = this.pass(node.tryBlock, context);
+
+        // if caught error in the try block...
+        if (isErr(childTry)) {
+
+            // ... create a new var context and put the errorParam (exception stringified) in it, if present
+            const catchVarStore = new VarStore(context.varStore);
+            if (node.errorParam) {
+                const errorStr = new StringBuiltin((childTry as Exception).details || (childTry as Exception).type);
+                catchVarStore.set(node.errorParam.value, errorStr);
+            }
+            const catchContext = new Context(
+                "trycatch", context, node.range?.start, false
+            ).setVarStore(catchVarStore);
+
+            // pass the catch block with the new context
+            const childCatch = this.pass(node.catchBlock, catchContext);
+            return childCatch;
+        }
+
+        return childTry;
     }
 
     passVarDeclare = (node: VarDeclareNode, context: Context) => {
