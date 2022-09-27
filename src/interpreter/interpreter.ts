@@ -6,10 +6,11 @@ import {
     ElseNode, FuncArgsNode, FuncCallNode, FuncDeclareNode, IfNode, RepeatNode, ReturnNode, SwitchNode, ThrowNode, 
     TryCatchNode, UnaryOpNode, VarAssignNode, VarDeclareNode, WhileNode
 } from "../parser/nodes";
-import { h, RTERROR_ALREADY_DECLARED, RTERROR_NOT_A_FUNC, RTERROR_NOT_DEFINED, RTERROR_NOT_ENOUGH_ARGS } from "../strings";
+import { h, RTERROR_ALREADY_DECLARED, RTERROR_ILLEGAL_BLOCK_BREAK, RTERROR_NOT_A_FUNC, RTERROR_NOT_DEFINED, RTERROR_NOT_ENOUGH_ARGS } from "../strings";
+import BlockBreak, { BlockBreakType } from "./blockBreak";
 import { BaseBuiltin, BooleanBuiltin, BuiltinOrErr, FuncBuiltin, NullBuiltin, NumberBuiltin, StringBuiltin } from "./builtins";
 import Context from "./context";
-import { getBooleanValue, isBoolean, isErr, isNumber, isString, isVariable, matchKeyword } from "./util";
+import { getBooleanValue, isBlockBreak, isBoolean, isErr, isNumber, isString, isVariable, matchKeyword } from "./util";
 import VarStore from "./varStore";
 
 const BINARYOP_MAP: any = {
@@ -143,16 +144,30 @@ export default class Interpreter {
 
         const children: BaseBuiltin[] = [];
         let err: any;
+        let aborted: boolean = false;
 
         // hoist function delcarations
         const nodesHoist = node.nodes.filter(f => f.type == 'funcDeclare');
         const nodesRest  = node.nodes.filter(f => f.type != 'funcDeclare');   
 
         const iter = (child: BaseNode) => {
-            if (err) return;
+            if (err || aborted) return;
             result = this.pass(child, blockContext);
             children.push(result);
             if (isErr(result)) err = result;
+            else if (isBlockBreak(result)) {
+
+                if (isBlockBreak(result, BlockBreakType.FUNCTION) && !blockContext.isInsideAFunc())
+                    err = new RuntimeException(RTERROR_ILLEGAL_BLOCK_BREAK[BlockBreakType.FUNCTION], result.range, result.context);
+
+                else if (isBlockBreak(result, BlockBreakType.LOOP) && !blockContext.isInsideALoop())
+                    err = new RuntimeException(RTERROR_ILLEGAL_BLOCK_BREAK[BlockBreakType.LOOP], result.range, result.context);
+
+                else if (isBlockBreak(result, BlockBreakType.ITERATION) && !blockContext.isInsideALoop())
+                    err = new RuntimeException(RTERROR_ILLEGAL_BLOCK_BREAK[BlockBreakType.ITERATION], result.range, result.context);
+
+                aborted = true;
+            }
         }
 
         nodesHoist.forEach(iter);
@@ -195,9 +210,19 @@ export default class Interpreter {
         let cond  = this.pass(node.cond, context);
         if (isErr(cond)) return cond;
 
+        const loopVarStore = new VarStore(context.varStore);
+        const loopContext  = new Context(
+            "loop", context, node.range?.start, false, true
+        ).setVarStore(loopVarStore);
+
         let lastBlock = this.passNothing();
         while (cond.castBool().value) {
-            lastBlock = this.pass(node.block, context);
+            let b = this.pass(node.block, loopContext);
+
+            if (isBlockBreak(b)) {
+                if (isBlockBreak(b, BlockBreakType.LOOP)) break;
+            }
+            else lastBlock = b;
 
             cond = this.pass(node.cond, context);
             if (isErr(cond)) return cond;
@@ -356,20 +381,30 @@ export default class Interpreter {
             (value as FuncBuiltin).name, context, node.range?.start, true
         ).setVarStore(funcVarStore);
 
-        const result = this.pass(value.value, funcContext);
-        return result;
+        const result: any = this.pass(value.value, funcContext);
+
+        if (isErr(result)) return result;
+        if (!isBlockBreak(result, BlockBreakType.FUNCTION)) return this.passNothing();
+        return (result as BlockBreak).value;
     }
 
     passReturn = (node: ReturnNode, context: Context) => {
-        const child = node.expr ? this.pass(node.expr, context) : null;
+        const child = node.expr ? this.pass(node.expr, context) : undefined;
+
+        if (child && isErr(child)) return child;
+
+        return new BlockBreak(BlockBreakType.FUNCTION, child)
+            .setPos(node.range).setContext(context);
     }
 
     passBreak = (node: BreakNode, context: Context) => {
-        
+        return new BlockBreak(BlockBreakType.LOOP)
+            .setPos(node.range).setContext(context);
     }
 
     passContinue = (node: ContinueNode, context: Context) => {
-
+        return new BlockBreak(BlockBreakType.ITERATION)
+            .setPos(node.range).setContext(context);
     }
 
     passDelete = (node: DeleteNode, context: Context) => {
@@ -429,7 +464,15 @@ export default class Interpreter {
 
     interpret (node: BlockNode): BuiltinOrErr {
         const globalContext = new Context('global').setVarStore(this.globalVarStore);
-        return this.pass(node, globalContext);
+        const result: any = this.pass(node, globalContext);
+
+        if (isBlockBreak(result)) {
+            return new RuntimeException(
+                RTERROR_ILLEGAL_BLOCK_BREAK[(result as BlockBreak).type], result.range, result.context
+            )
+        }
+
+        return result;
     }
 
 }

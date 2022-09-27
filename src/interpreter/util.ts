@@ -1,6 +1,7 @@
 import { RuntimeException } from "../classes/exception";
 import { TOKEN_FLOAT, TOKEN_IDENTIFIER, TOKEN_INT, TOKEN_KEYWORD, TOKEN_STRING } from "../lexer/constants";
 import Token from "../lexer/token";
+import BlockBreak, { BlockBreakType } from "./blockBreak";
 import { BuiltinOrErr } from "./builtins";
 
 export function isNumber (token: Token) {
@@ -29,4 +30,8 @@ export function matchKeyword (map: any, token: Token) {
 
 export function isErr (h: BuiltinOrErr) {
     return h instanceof RuntimeException;
+}
+
+export function isBlockBreak (h: BuiltinOrErr, type?: BlockBreakType) {
+    return h instanceof BlockBreak && (type !== undefined ? h.type == type : true);
 }

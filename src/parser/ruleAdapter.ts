@@ -3,7 +3,7 @@ import { PositionRange } from "../classes/position";
 import { ATOMS, SYMBOLS, TOKEN_CPAREN, TOKEN_FLOAT, TOKEN_IDENTIFIER, TOKEN_INT, TOKEN_KEYWORD, TOKEN_OPAREN, TOKEN_STRING } from "../lexer/constants";
 import Token from "../lexer/token";
 import { ERROR_UNEXP_TOKEN, h } from "../strings";
-import { AtomNode, BlockNode, CasesNode, FuncCallNode, NODES, NODE_INPUT_NODES } from "./nodes";
+import { AtomNode, BlockNode, BreakNode, CasesNode, ContinueNode, FuncCallNode, NODES, NODE_INPUT_NODES, ReturnNode } from "./nodes";
 import grammarRules from "./grammarRules.json";
 
 export type Rule = string[][];
@@ -39,14 +39,18 @@ export default class ParserRuleAdapter {
         // if is block, just create a new BlockNode
         if (isBlock) return new BlockNode(...nodes).setPos(range);
         let r;
+        let singleNodeMatch = this.getSingleNode(nodes);
 
         // if the node data matches an atom, create an Atom node
         if (this.isAtom(nodes)) {
             r = AtomNode;
         }
-        // if the node data matches a function call, create a FuncCall node
+        // if the node data matches a other special cases, create a required node
         else if (this.isFunctionCall(nodes)) {
             r = FuncCallNode;
+        }
+        else if (singleNodeMatch) {
+            r = singleNodeMatch;
         }
         // if the result is the "pass" keyword or the nodes list contains just one node
         // pass the first node from the parameter
@@ -85,6 +89,26 @@ export default class ParserRuleAdapter {
         if (nodes[nodes.length-1].type != TOKEN_CPAREN) return false;
 
         return true;
+    }
+
+    getSingleNode (nodes: any[]) {
+        if (nodes[0].type != TOKEN_KEYWORD) return false;
+
+        switch (nodes[0].value) {
+            case "return":   return ReturnNode;
+            case "break":    return BreakNode;
+            case "continue": return ContinueNode;
+        }
+
+        return false;
+    }
+
+    isBreak (nodes: any[]) {
+        return nodes[0].type == TOKEN_KEYWORD && nodes[0].value == "return";
+    }
+
+    isContinue (nodes: any[]) {
+        return nodes[0].type == TOKEN_KEYWORD && nodes[0].value == "return";
     }
 
     getRuleNode (name: string) {

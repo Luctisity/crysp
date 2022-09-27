@@ -8,6 +8,11 @@ export const RTERROR_NOT_DEFINED      = "$ is not defined in this scope";
 export const RTERROR_ALREADY_DECLARED = "$ has already been declared in this scope";
 export const RTERROR_NOT_A_FUNC       = "$ is not a function";
 export const RTERROR_NOT_ENOUGH_ARGS  = "Too few arguments provided to function $";
+export const RTERROR_ILLEGAL_BLOCK_BREAK = [
+    "Cannot return outside of a function",
+    "Cannot break outside of a loop or a switch case",
+    "Cannot continue outside of a loop iteration"
+];
 
 export function h (str: string, repl: string) {
     return str.replaceAll("$", repl);

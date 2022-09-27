@@ -2,9 +2,10 @@ import { RuntimeException } from "../classes/exception";
 import { PositionRange } from "../classes/position";
 import { BaseNode } from "../parser/nodes";
 import { RTERROR_DIV_ZERO } from "../strings";
+import BlockBreak from "./blockBreak";
 import Context from "./context";
 
-export type BuiltinOrErr = Builtin | RuntimeException;
+export type BuiltinOrErr = Builtin | RuntimeException | BlockBreak;
 
 interface Builtin {
 
