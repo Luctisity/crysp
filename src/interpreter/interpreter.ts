@@ -206,29 +206,42 @@ export default class Interpreter {
         // TODO
     }
 
-    passWhile = (node: WhileNode, context: Context) => {
-        let cond  = this.pass(node.cond, context);
-        if (isErr(cond)) return cond;
+    loopIteration = (node: any, loopContext: Context, lastBlock: any) => {
+        let b = this.pass(node.block, loopContext);
 
+        if (isBlockBreak(b)) {
+            if (isBlockBreak(b, BlockBreakType.LOOP)) return false;
+        }
+        else lastBlock = b;
+
+        return lastBlock;
+    }
+
+    loopContext = (node: any, context: Context) => {
         const loopVarStore = new VarStore(context.varStore);
         const loopContext  = new Context(
             "loop", context, node.range?.start, false, true
         ).setVarStore(loopVarStore);
 
+        return loopContext;
+    }
+
+    passWhile = (node: WhileNode, context: Context) => {
+        let cond  = this.pass(node.cond, context);
+        if (isErr(cond)) return cond;
+
+        const loopContext  = this.loopContext(node, context);
+
         let lastBlock = this.passNothing();
         while (cond.castBool().value) {
-            let b = this.pass(node.block, loopContext);
-
-            if (isBlockBreak(b)) {
-                if (isBlockBreak(b, BlockBreakType.LOOP)) break;
-            }
-            else lastBlock = b;
+            lastBlock = this.loopIteration(node, loopContext, lastBlock);
+            if (!lastBlock) break;
 
             cond = this.pass(node.cond, context);
             if (isErr(cond)) return cond;
         }
 
-        return lastBlock;
+        return lastBlock || this.passNothing();
     }
 
     passDoWhile = (node: DoWhileNode, context: Context) => {
@@ -238,14 +251,17 @@ export default class Interpreter {
         let cond  = this.pass(node.cond, context);
         if (isErr(cond)) return cond;
 
+        const loopContext  = this.loopContext(node, context);
+
         while (cond.castBool().value) {
-            lastBlock = this.pass(node.block, context);
+            lastBlock = this.loopIteration(node, loopContext, lastBlock);
+            if (!lastBlock) break;
 
             cond = this.pass(node.cond, context);
             if (isErr(cond)) return cond;
         }
 
-        return lastBlock;
+        return lastBlock || this.passNothing();
     }
 
     passRepeat = (node: RepeatNode, context: Context) => {
@@ -255,9 +271,14 @@ export default class Interpreter {
         let lastBlock = this.passNothing();
         let iter = Math.round(expr.numerify().value); // make the iteration number an integer by rounding it
 
-        for (let i = 0; i < iter; i++) lastBlock = this.pass(node.block, context);
+        const loopContext  = this.loopContext(node, context);
 
-        return lastBlock;
+        for (let i = 0; i < iter; i++) {
+            lastBlock = this.loopIteration(node, loopContext, lastBlock);
+            if (!lastBlock) break;
+        }
+
+        return lastBlock || this.passNothing();
     }
 
     passTryCatch = (node: TryCatchNode, context: Context) => {
