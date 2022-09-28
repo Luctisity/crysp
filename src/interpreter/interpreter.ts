@@ -1,6 +1,5 @@
 import { Exception, RuntimeException } from "../classes/exception";
-import { 
-    AnonymousFuncDeclareNode,
+import {
     AtomNode, BaseNode, BinaryOpNode, BlockNode, BreakNode, 
     CasesNode, ContinueNode, DefaultCaseNode, DeleteNode, DoWhileNode,
     ElseNode, FuncArgsNode, FuncCallNode, FuncDeclareNode, IfNode, RepeatNode, ReturnNode, SwitchNode, ThrowNode, 
@@ -352,8 +351,8 @@ export default class Interpreter {
 
         const value  = node.expr;
         const params = node.args?.map(m => m.value || m.token?.value);
-        const func   = new FuncBuiltin(value, name, params);
-        context.varStore?.set(name, func);
+        const func   = new FuncBuiltin(value, name, params, node.oneLiner);
+        if (name) context.varStore?.set(name, func);
 
         return name ? this.passNothing() : func;
     }
@@ -404,8 +403,15 @@ export default class Interpreter {
 
         const result: any = this.pass(value.value, funcContext);
 
+        // if the result is error, just return the result
         if (isErr(result)) return result;
-        if (!isBlockBreak(result, BlockBreakType.FUNCTION)) return this.passNothing();
+        // if the result is not a "return" block break, return null
+        if (!isBlockBreak(result, BlockBreakType.FUNCTION)) {
+            // if the function is a one-liner, just return the result, otherwise null
+            if ((value as FuncBuiltin).oneLiner) return result;
+            return this.passNothing();
+        }
+        // otherwise return the block break's value
         return (result as BlockBreak).value;
     }
 

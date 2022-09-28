@@ -343,11 +343,13 @@ export class FuncDeclareNode extends BaseNode {
     name?: Token;
     args?: any[] = [];
     expr:  BaseNode;
+    oneLiner = false;
 
     constructor (_keyword: Token, ...args: any[]) {
         super();
         if (args[0] instanceof Token) this.name = args.shift();
         this.expr = args.pop();
+        if (!(this.expr instanceof BlockNode)) this.oneLiner = true;
         this.args = args;
     }
 
@@ -363,10 +365,12 @@ export class AnonymousFuncDeclareNode extends BaseNode {
 
     args?: any[] = [];
     expr:  BaseNode;
+    oneLiner = false;
 
     constructor (_keyword: Token, ...args: any[]) {
         super();
         this.expr = args.pop();
+        if (!(this.expr instanceof BlockNode)) this.oneLiner = true;
         this.args = args;
     }
 
@@ -391,7 +395,7 @@ export class FuncCallNode extends BaseNode {
     }
 
     toString () {
-        return `${this.name}()`;
+        return `${this.name}(${this.args || ""})`;
     }
 
 }
@@ -406,6 +410,11 @@ export class FuncArgsNode extends BaseNode {
         super();
         this.nodes = nodes;
     }
+
+    toString () {
+        return this.nodes.join();
+    }
+
 
 }
 

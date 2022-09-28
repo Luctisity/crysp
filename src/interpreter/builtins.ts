@@ -254,12 +254,14 @@ export class FuncBuiltin extends BaseBuiltin implements Builtin {
     name:   string;
     params: string[] = [];
     isFunc = true;
+    oneLiner = false;
 
-    constructor (value: BaseNode, name?: string, params?: string[]) {
+    constructor (value: BaseNode, name?: string, params?: string[], oneLiner: boolean = false) {
         super();
         this.value = value;
         this.name  = name || BUILTIN_FUNCTION_ANON;
         this.params = params || this.params;
+        this.oneLiner = oneLiner;
     }
 
     numerify (): NumberBuiltin {
