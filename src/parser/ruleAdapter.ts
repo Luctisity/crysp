@@ -117,6 +117,10 @@ export default class ParserRuleAdapter {
         return true;
     }
 
+    isClosing (token: any, type?: string) {
+        return token && token instanceof Token && token.type == type;
+    }
+
     getRuleNode (name: string) {
         const ruleDataFull = [...(grammarRules as any)[name]];
         const ruleNode: string = ruleDataFull.pop();

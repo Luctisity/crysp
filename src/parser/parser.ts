@@ -1,8 +1,8 @@
 import { Exception, SyntaxErrorException } from "../classes/exception";
 import { p } from "../classes/position";
-import { TOKEN_BLOCKSEP, TOKEN_DOT, TOKEN_NEWL, TOKEN_OPAREN } from "../lexer/constants";
+import { TOKEN_BLOCKSEP, TOKEN_CBRACK, TOKEN_CPAREN, TOKEN_DOT, TOKEN_NEWL, TOKEN_OBRACK, TOKEN_OPAREN } from "../lexer/constants";
 import Token from "../lexer/token";
-import { ERROR_MEMACCESSDOT } from "../strings";
+import { ERROR_MEMACCESSDOT, ERROR_UNEXP_TOKEN } from "../strings";
 import grammarRules from "./grammarRules.json";
 import { FuncArgsNode, FuncCallNode, MemberAccessNode } from "./nodes";
 import ParserRuleAdapter, { Rule } from "./ruleAdapter";
@@ -207,13 +207,25 @@ export default class Parser {
                 let targetNode = ruleAdapter.getCorrespondingNode(nodeData, targetRuleNode, isBlock, p(ps, pe, this.text));
 
                 if (targetNode instanceof MemberAccessNode) {
+                    let closeTok = targetNode.closeTok;
+
                     // if the target node is a member access node that has "(" as the operator, convert to function call node
                     if (targetNode.operator.type == TOKEN_OPAREN)
                         targetNode = new FuncCallNode(targetNode.expr, (targetNode.member as FuncArgsNode)).setPos(targetNode.range);
                     
+                    // if the expression after the "." is not an identifier, throw error
                     else if (targetNode.operator.type == TOKEN_DOT && !ruleAdapter.isIdentifier(targetNode.member)) {
                         return new SyntaxErrorException(ERROR_MEMACCESSDOT, targetNode.member.range)
-                        break; 
+                    }
+
+                    // if not found the closing "]" for "[" or ")" for "(", throw error
+                    else if (
+                        targetNode.operator.type == TOKEN_OBRACK && !ruleAdapter.isClosing(closeTok, TOKEN_CBRACK) ||
+                        targetNode.operator.type == TOKEN_OPAREN && !ruleAdapter.isClosing(closeTok, TOKEN_CPAREN)
+                    ) {
+                        error = true;
+                        if (!closeTok?.type || ![TOKEN_CBRACK, TOKEN_CPAREN].includes(closeTok.type)) this.next();
+                        break;
                     }
                 }
 

@@ -96,19 +96,21 @@ export class MemberAccessNode extends BaseNode {
 
     type = 'memberAccess';
 
-    expr:     BaseNode;
-    operator: Token;
-    member:   BaseNode | Token;
+    expr:      BaseNode;
+    operator:  Token;
+    member:    BaseNode | Token;
+    closeTok?: Token;
 
-    constructor (expr: BaseNode, operator: Token, member: BaseNode | Token) {
+    constructor (expr: BaseNode, operator: Token, member: BaseNode | Token, closeTok?: Token) {
         super();
         this.expr = expr;
         this.operator = operator;
         this.member = member;
+        this.closeTok = closeTok;
     }
 
     toString () {
-        return `( ${this.expr} ${this.operator} ${this.member} )`;
+        return `( ${this.expr} ${this.operator} ${this.member} ${this.closeTok || ""} )`;
     }
 
 }
