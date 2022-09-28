@@ -1,16 +1,18 @@
 import { RuntimeException } from "../classes/exception";
 import { PositionRange } from "../classes/position";
+import Token from "../lexer/token";
 import { BaseNode } from "../parser/nodes";
-import { BUILTIN_FUNCTION_ANON, BUILTIN_FUNCTION_NAME, RTERROR_DIV_ZERO } from "../strings";
+import { BUILTIN_FUNCTION_ANON, BUILTIN_FUNCTION_NAME, h, RTERROR_DIV_ZERO, RTERROR_READ_PROPS_NULL } from "../strings";
 import BlockBreak from "./blockBreak";
 import Context from "./context";
-import { repeatStr } from "./util";
+import { builtinOrToken, repeatStr } from "./util";
 
 export type BuiltinOrErr = Builtin | RuntimeException | BlockBreak;
 
 interface Builtin {
 
     value: any;
+    name: string;
     isFunc: boolean;
 
     set       (what: BaseBuiltin): BaseBuiltin;
@@ -22,6 +24,8 @@ interface Builtin {
     divide    (what: Builtin): BuiltinOrErr;
     power     (what: Builtin): Builtin;
     modulo    (what: Builtin): Builtin;
+
+    member    (what: Builtin|Token): BuiltinOrErr;
 
     equals    (what: Builtin): Builtin;
     notEquals (what: Builtin): Builtin;
@@ -44,6 +48,7 @@ interface Builtin {
 export class BaseBuiltin {
 
     value:    any;
+    name   =  "";
     isFunc =  false;
     range?:   PositionRange;
     context?: Context;
@@ -123,6 +128,10 @@ export class BaseBuiltin {
         return new NumberBuiltin(this.numerify().value % what.numerify().value).setContext(this.context);
     }
 
+    member (_what: Builtin|Token): BuiltinOrErr {
+        return new NullBuiltin();
+    }
+
     equals (what: Builtin): Builtin {
         // strict equality!!!
         return new BooleanBuiltin(this.value === what.value).setContext(this.context);
@@ -185,6 +194,10 @@ export class BaseBuiltin {
 export class NullBuiltin extends BaseBuiltin implements Builtin {
 
     value = null;
+
+    member (what: Builtin|Token): BuiltinOrErr {
+        return new RuntimeException(h(RTERROR_READ_PROPS_NULL, builtinOrToken(what)), this.range, this.context);
+    }
 
     numerify (): NumberBuiltin {
         return new NumberBuiltin(0).setContext(this.context);
@@ -274,7 +287,6 @@ export class StringBuiltin extends BaseBuiltin implements Builtin {
 export class FuncBuiltin extends BaseBuiltin implements Builtin {
 
     value:  BaseNode;
-    name:   string;
     params: string[] = [];
     isFunc = true;
     oneLiner = false;

@@ -1,7 +1,7 @@
 import { Exception, RuntimeException } from "../classes/exception";
 import {
     AtomNode, BaseNode, BinaryOpNode, BlockNode, BreakNode, ContinueNode, DeleteNode, DoWhileNode,
-    ElseNode, FuncArgsNode, FuncCallNode, FuncDeclareNode, IfNode, RepeatNode, ReturnNode, SwitchNode, ThrowNode, 
+    ElseNode, FuncArgsNode, FuncCallNode, FuncDeclareNode, IfNode, MemberAccessNode, RepeatNode, ReturnNode, SwitchNode, ThrowNode, 
     TryCatchNode, UnaryOpNode, VarAssignNode, VarDeclareNode, WhileNode
 } from "../parser/nodes";
 import { h, RTERROR_ALREADY_DECLARED, RTERROR_ILLEGAL_BLOCK_BREAK, RTERROR_NOT_A_FUNC, RTERROR_NOT_DEFINED, RTERROR_NOT_ENOUGH_ARGS } from "../strings";
@@ -50,6 +50,11 @@ const ASSIGNOP_MAP: any = {
     'MODBY':   'modulo',
     'INCR':    'increment',
     'DECR':    'decrement',
+}
+
+const MEMBEROP_MAP: any = {
+    'DOT':    'member',
+    'OBRACK': 'member'
 }
 
 export default class Interpreter {
@@ -119,6 +124,23 @@ export default class Interpreter {
         
 
         const result: BaseBuiltin = (childLeft as any)[method](childRight);
+        return result.setPos(node.range);
+    }
+
+    passMemberAccess = (node: MemberAccessNode, context: Context) => {
+        const childExpr = this.pass(node.expr, context);
+        if (isErr(childExpr)) return childExpr;
+
+        const method = MEMBEROP_MAP[node.operator.type] || matchKeyword(MEMBEROP_MAP, node.operator);
+        if (!method || !(childExpr as any)[method]) return this.passNothing();
+
+        const childMember = node.member instanceof BaseNode 
+            ? this.pass(node.member, context)
+            : node.member;
+
+        if (isErr(childMember)) return childMember;
+
+        const result: BaseBuiltin = (childExpr as any)[method](childMember);
         return result.setPos(node.range);
     }
 
@@ -388,12 +410,13 @@ export default class Interpreter {
     }
 
     passFuncCall = (node: FuncCallNode, context: Context) => {
-        const name  = node.name.value;
-        const value = context.varStore?.get(name);
+        const value: FuncBuiltin = this.pass(node.expr, context) as FuncBuiltin;
+        console.log(value);
+        if (isErr(value)) return value;
 
         // if the var is not defined or is not a function, throw error
-        if (!value)        return new RuntimeException(h(RTERROR_NOT_DEFINED, name), node.range, context);
-        if (!value.isFunc) return new RuntimeException(h(RTERROR_NOT_A_FUNC,  name), node.range, context);
+        if (!value)        return new RuntimeException(h(RTERROR_NOT_DEFINED, "gggggg"), node.range, context);
+        if (!value.isFunc) return new RuntimeException(h(RTERROR_NOT_A_FUNC,  value.name || value.castStr().value), node.range, context);
 
         // args can come in different types for some reason
         let args: BaseNode[] = [];
@@ -403,7 +426,7 @@ export default class Interpreter {
         const params = (value as FuncBuiltin).params;
 
         // if the number of provided args is less than the number of expected params, error
-        if (args.length < params.length) return new RuntimeException(h(RTERROR_NOT_ENOUGH_ARGS, name), node.range, context);
+        if (args.length < params.length) return new RuntimeException(h(RTERROR_NOT_ENOUGH_ARGS, value.name), node.range, context);
 
         // create separate function varstore
         const funcVarStore = new VarStore(context.varStore);
@@ -480,32 +503,33 @@ export default class Interpreter {
     
 
     methodMap: any = {
-        'atom':        this.passAtom,
+        'atom':         this.passAtom,
 
-        'binaryOp':    this.passBinaryOp,
-        'unaryOp':     this.passUnaryOp,
-        'block':       this.passBlock,
+        'binaryOp':     this.passBinaryOp,
+        'unaryOp':      this.passUnaryOp,
+        'block':        this.passBlock,
+        'memberAccess': this.passMemberAccess,
 
-        'if':          this.passIf,
-        'else':        this.passElse,
-        'switch':      this.passSwitch,
+        'if':           this.passIf,
+        'else':         this.passElse,
+        'switch':       this.passSwitch,
 
-        'while':       this.passWhile,
-        'dowhile':     this.passDoWhile,
-        'repeat':      this.passRepeat,
-        'trycatch':    this.passTryCatch,
+        'while':        this.passWhile,
+        'dowhile':      this.passDoWhile,
+        'repeat':       this.passRepeat,
+        'trycatch':     this.passTryCatch,
 
-        'varDeclare':  this.passVarDeclare,
-        'varAssign':   this.passVarAssign,
-        'funcDeclare': this.passFuncDeclare,
+        'varDeclare':   this.passVarDeclare,
+        'varAssign':    this.passVarAssign,
+        'funcDeclare':  this.passFuncDeclare,
         'anonymousFuncDeclare': this.passFuncDeclare,
-        'funcCall':    this.passFuncCall,
+        'funcCall':     this.passFuncCall,
 
-        'return':      this.passReturn,
-        'break':       this.passBreak,
-        'continue':    this.passContinue,
-        'delete':      this.passDelete,
-        'throw':       this.passThrow
+        'return':       this.passReturn,
+        'break':        this.passBreak,
+        'continue':     this.passContinue,
+        'delete':       this.passDelete,
+        'throw':        this.passThrow
     }
 
     pass = (node: BaseNode, context: Context): BaseBuiltin => {

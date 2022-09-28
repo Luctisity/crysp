@@ -1,4 +1,4 @@
-import { BaseBuiltin, FuncBuiltin } from "./builtins";
+import { BaseBuiltin } from "./builtins";
 
 export type VarDict = {
     [key: string]: BaseBuiltin
@@ -23,7 +23,7 @@ export default class VarStore {
     }
 
     set (name: string, value: BaseBuiltin) {
-        if (value.isFunc) (value as FuncBuiltin).name = name;
+        value.name = name;
         this.vars[name] = value;
     }
 

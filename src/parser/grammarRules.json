@@ -175,8 +175,8 @@
         "unaryOp"
     ],
     "power": [
-        ["$atom", "@POW", "$factor", "*"],
-        ["$atom"],
+        ["$member", "@POW", "$factor", "*"],
+        ["$member"],
         "binaryOp"
     ],
 
@@ -202,6 +202,15 @@
         "throw"
     ],
 
+    "member": [
+        ["$atom", "@DOT", "@IDENTIFIER", "*"],
+        ["$atom", "@OBRACK", "$expr", "@CBRACK", "*"],
+        ["$atom", "@OPAREN", "@CPAREN"],
+        ["$atom", "@OPAREN", "$funcArgs", "@CPAREN"],
+        ["$atom"],
+        "memberAccess"
+    ],
+
     "atom": [
         ["@FLOAT"],
         ["@INT"],
@@ -209,15 +218,8 @@
         ["@KEYWORD:true"],
         ["@KEYWORD:false"],
         ["@KEYWORD:null"],
-        ["$funcCall"],
         ["@IDENTIFIER"],
         ["@OPAREN&", "$expr", "@CPAREN&"],
-        "pass"
-    ],
-
-    "funcCall": [
-        ["@IDENTIFIER", "@OPAREN", "@CPAREN"],
-        ["@IDENTIFIER", "@OPAREN", "$funcArgs", "@CPAREN"],
         "pass"
     ],
 

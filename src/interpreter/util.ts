@@ -28,7 +28,7 @@ export function matchKeyword (map: any, token: Token) {
     return token.type == TOKEN_KEYWORD ? map[token.value] : undefined;
 }
 
-export function isErr (h: BuiltinOrErr) {
+export function isErr (h: any) {
     return h instanceof RuntimeException;
 }
 
@@ -48,4 +48,8 @@ export function repeatStr (s: string, n: number) {
     let ss = '';
     for (let i = 0; i < n; i++) ss += s;
     return ss;
+}
+
+export function builtinOrToken (h: any) {
+    return h instanceof Token ? h.value.toString() : h.value;
 }

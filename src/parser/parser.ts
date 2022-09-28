@@ -1,8 +1,9 @@
 import { Exception } from "../classes/exception";
 import { p } from "../classes/position";
-import { TOKEN_BLOCKSEP, TOKEN_NEWL } from "../lexer/constants";
+import { TOKEN_BLOCKSEP, TOKEN_NEWL, TOKEN_OPAREN } from "../lexer/constants";
 import Token from "../lexer/token";
 import grammarRules from "./grammarRules.json";
+import { FuncArgsNode, FuncCallNode, MemberAccessNode } from "./nodes";
 import ParserRuleAdapter, { Rule } from "./ruleAdapter";
 
 export type ParserCurrentState = {
@@ -138,6 +139,7 @@ export default class Parser {
             // and reset the step (recursive binary operation joining)
             else if (ruleAdapter.isABinaryRepeatInstruction(ruleData, variation, step)) {
                 step = 1;
+                if (name == "member") variation = 0;
                 let ps = nodes[0].range?.start;
                 let pe = nodes[nodes.length-1].range?.end;
                 const targetNode = ruleAdapter.getCorrespondingNode(nodes, ruleNode, false, p(ps!, pe, this.text));
@@ -201,7 +203,12 @@ export default class Parser {
                 }
                 
                 const targetRuleNode = ruleAdapter.getRuleNode(ruleName);
-                const targetNode = ruleAdapter.getCorrespondingNode(nodeData, targetRuleNode, isBlock, p(ps, pe, this.text));
+                let targetNode = ruleAdapter.getCorrespondingNode(nodeData, targetRuleNode, isBlock, p(ps, pe, this.text));
+
+                // if the target node is a member access node that has "(" as the operator, convert to function call node
+                if (targetNode instanceof MemberAccessNode && targetNode.operator.type == TOKEN_OPAREN) {
+                    targetNode = new FuncCallNode(targetNode.expr, (targetNode.member as FuncArgsNode)).setPos(targetNode.range);
+                }
 
                 if (ruleAdapter.doesBlockContainsError(targetNode)) {
                     this.next();

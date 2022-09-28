@@ -3,6 +3,7 @@ import { Exception, IllegalCharException } from "../classes/exception";
 import { 
     getStringEscapeCode, hasSymbolsStartWith, isComment, isCommentEnd, isDot, 
     isExp, isFloatNumeric, isFloatNumericExp, isKeyword, 
+    isNumeric, 
     isStringQuote, isSymbol, isWhitespace, isWord 
 } from "./util";
 import { 
@@ -94,8 +95,9 @@ export default class Lexer {
                 if (s instanceof Exception) return s;
             }
 
-            // numeric
-            else if (isFloatNumeric(char)) {
+            // numeric (if found dot, check if the character immediately after it is 0-9)
+            else if (isFloatNumeric(char) && (char == NUMERIC_DOT ? isNumeric(this.textPart![this.current.pos.index+1]) : true)) {
+                console.log(char == NUMERIC_DOT && isNumeric(this.textPart![this.current.pos.index+1]))
                 let n = this.makeToken(tokens, this.makeNumber, char);
                 if (n instanceof Exception) return n;
             }
@@ -139,7 +141,7 @@ export default class Lexer {
 
             if (char == COMMENT_NEWLINE) {
                 this.prev();
-                return new IllegalCharException(ERROR_UNCLOSED_STR, p(this.current.pos, this.text));
+                return new IllegalCharException(ERROR_UNCLOSED_STR, p(this.current.pos.prev().prev(), this.text));
             }
 
             // if the char is a backslash, treat it as an escape command for the next char
@@ -147,7 +149,7 @@ export default class Lexer {
                 this.next();
                 let nextChar = this.current.char;
                 // if no next char, throw error
-                if(!nextChar) return new IllegalCharException(ERROR_UNCLOSED_STR, p(this.current.pos, this.text));
+                if(!nextChar) return new IllegalCharException(ERROR_UNCLOSED_STR, p(this.current.pos.prev().prev(), this.text));
                 s += getStringEscapeCode(nextChar);
             } else {
                 s += char;
@@ -157,7 +159,7 @@ export default class Lexer {
         }
 
         // if reached the end, but no closing quote is found, throw error
-        if (!this.current.char) return new IllegalCharException(ERROR_UNCLOSED_STR, p(this.current.pos, this.text))
+        if (!this.current.char) return new IllegalCharException(ERROR_UNCLOSED_STR, p(this.current.pos.prev().prev(), this.text))
 
         // add symbol immediately after the string
         this.symbol = this.makeSymbol();
@@ -193,14 +195,14 @@ export default class Lexer {
         }
 
         // if immediately proceeded by a word character, throw error
-        if (isWord(this.current.char!)) return new IllegalCharException(ERROR_NUMERIC_IDNTF, p(this.current.pos, this.text));
+        if (isWord(this.current.char!)) return new IllegalCharException(ERROR_NUMERIC_IDNTF, p(this.current.pos.prev().prev(), this.text));
 
         // if dot cound is more than 1, throw error
-        if (dots > 1) return new IllegalCharException(h(ERROR_UNEXP_CHAR, NUMERIC_DOT), p(this.current.pos, this.text));
+        if (dots > 1) return new IllegalCharException(h(ERROR_UNEXP_CHAR, NUMERIC_DOT), p(this.current.pos.prev().prev(), this.text));
 
         // if exponent symbol count is more than 1 or if there's a dot after it, throw error
-        if (exps > 1 || nothingAfterExt) return new IllegalCharException(h(ERROR_UNEXP_CHAR, NUMERIC_EXP), p(this.current.pos, this.text));
-        if (dotAfterExp)                 return new IllegalCharException(h(ERROR_UNEXP_CHAR, NUMERIC_DOT), p(this.current.pos, this.text));
+        if (exps > 1 || nothingAfterExt) return new IllegalCharException(h(ERROR_UNEXP_CHAR, NUMERIC_EXP), p(this.current.pos.prev().prev(), this.text));
+        if (dotAfterExp)                 return new IllegalCharException(h(ERROR_UNEXP_CHAR, NUMERIC_DOT), p(this.current.pos.prev().prev(), this.text));
 
          // add symbol immediately after the number
         this.symbol = this.makeSymbol();

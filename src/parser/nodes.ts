@@ -92,6 +92,27 @@ export class BlockNode extends BaseNode {
 
 }
 
+export class MemberAccessNode extends BaseNode {
+
+    type = 'memberAccess';
+
+    expr:     BaseNode;
+    operator: Token;
+    member:   BaseNode | Token;
+
+    constructor (expr: BaseNode, operator: Token, member: BaseNode | Token) {
+        super();
+        this.expr = expr;
+        this.operator = operator;
+        this.member = member;
+    }
+
+    toString () {
+        return `( ${this.expr} ${this.operator} ${this.member} )`;
+    }
+
+}
+
 export class IfNode extends BaseNode {
 
     type = 'if';
@@ -384,18 +405,17 @@ export class FuncCallNode extends BaseNode {
 
     type = 'funcCall';
 
-    name:  Token;
+    expr:  BaseNode;
     args?: BaseNode;
 
-    constructor (name: Token, ...args: BaseNode[]) {
-        args = args.slice(1, -1);
+    constructor (expr: BaseNode, args?: FuncArgsNode) {
         super();
-        this.name = name;
-        this.args = args[0] || undefined;
+        this.expr = expr;
+        this.args = args || undefined;
     }
 
     toString () {
-        return `${this.name}(${this.args || ""})`;
+        return `${this.expr}(${this.args || ""})`;
     }
 
 }
@@ -488,34 +508,35 @@ export class ThrowNode extends BaseNode {
 }
 
 export const NODES: any = {
-    'atom':        AtomNode,
-    'binaryOp':    BinaryOpNode,
-    'unaryOp':     UnaryOpNode,
-    'block':       BlockNode,
+    'atom':         AtomNode,
+    'binaryOp':     BinaryOpNode,
+    'unaryOp':      UnaryOpNode,
+    'block':        BlockNode,
+    'memberAccess': MemberAccessNode,
 
-    'if':          IfNode,
-    'else':        ElseNode,
-    'switch':      SwitchNode,
-    'defaultCase': DefaultCaseNode,
-    'cases':       CasesNode,
+    'if':           IfNode,
+    'else':         ElseNode,
+    'switch':       SwitchNode,
+    'defaultCase':  DefaultCaseNode,
+    'cases':        CasesNode,
 
-    'while':       WhileNode,
-    'dowhile':     DoWhileNode,
-    'repeat':      RepeatNode,
-    'trycatch':    TryCatchNode,
+    'while':        WhileNode,
+    'dowhile':      DoWhileNode,
+    'repeat':       RepeatNode,
+    'trycatch':     TryCatchNode,
 
-    'varDeclare':  VarDeclareNode,
-    'varAssign':   VarAssignNode,
-    'funcDeclare': FuncDeclareNode,
+    'varDeclare':   VarDeclareNode,
+    'varAssign':    VarAssignNode,
+    'funcDeclare':  FuncDeclareNode,
     'anonymousFuncDeclare': AnonymousFuncDeclareNode,
-    'funcCall':    FuncCallNode,
-    'funcArgs':    FuncArgsNode,
+    'funcCall':     FuncCallNode,
+    'funcArgs':     FuncArgsNode,
     
-    'return':      ReturnNode,
-    'break':       BreakNode,
-    'continue':    ContinueNode,
-    'delete':      DeleteNode,
-    'throw':       ThrowNode
+    'return':       ReturnNode,
+    'break':        BreakNode,
+    'continue':     ContinueNode,
+    'delete':       DeleteNode,
+    'throw':        ThrowNode
 }
 
 export const NODE_INPUT_NODES = [
