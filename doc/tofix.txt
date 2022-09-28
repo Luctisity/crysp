@@ -9,7 +9,9 @@ x add error handling
 x functions
 - fix allowing empty expressions in block/expr fields (for example after ifs)
 x allow empty blocks 
-- add an option to call expressions as functions (example: myFunc()(), (myFunc())(), etc.)
+x add an option to call expressions as functions (example: myFunc()(), (myFunc())(), etc.)
+- add support for setting members (MemberSetNode)
+- consts and enums
 
 [Interpreter]
 
@@ -19,3 +21,4 @@ x switch case
 x fix anonymous functions (they appear as blocks)
 x add support for one line functions without return
 x fix return statements working in one liners not in functions
+- add support for setting members (passMemberSet)

@@ -111,6 +111,12 @@ export default class ParserRuleAdapter {
         return nodes[0].type == TOKEN_KEYWORD && nodes[0].value == "return";
     }
 
+    isIdentifier (token: any) {
+        if (!(token instanceof Token))      return false;
+        if (token.type != TOKEN_IDENTIFIER) return false;
+        return true;
+    }
+
     getRuleNode (name: string) {
         const ruleDataFull = [...(grammarRules as any)[name]];
         const ruleNode: string = ruleDataFull.pop();

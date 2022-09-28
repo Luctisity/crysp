@@ -2,6 +2,7 @@ export const ERROR_UNEXP_CHAR    = "Unexpected character: $";
 export const ERROR_NUMERIC_IDNTF = "Identifier names cannot start with a numberic digit";
 export const ERROR_UNCLOSED_STR  = "Expected a closing string quote before the end of line";
 export const ERROR_UNEXP_TOKEN   = "Unexpected token: $";
+export const ERROR_MEMACCESSDOT  = "Unexpected expression after the \".\" operator. Only identifiers are allowed.";
 
 export const RTERROR_DIV_ZERO         = "Division by zero";
 export const RTERROR_NOT_DEFINED      = "$ is not defined in this scope";

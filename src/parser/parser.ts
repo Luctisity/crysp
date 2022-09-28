@@ -1,7 +1,8 @@
-import { Exception } from "../classes/exception";
+import { Exception, SyntaxErrorException } from "../classes/exception";
 import { p } from "../classes/position";
-import { TOKEN_BLOCKSEP, TOKEN_NEWL, TOKEN_OPAREN } from "../lexer/constants";
+import { TOKEN_BLOCKSEP, TOKEN_DOT, TOKEN_NEWL, TOKEN_OPAREN } from "../lexer/constants";
 import Token from "../lexer/token";
+import { ERROR_MEMACCESSDOT } from "../strings";
 import grammarRules from "./grammarRules.json";
 import { FuncArgsNode, FuncCallNode, MemberAccessNode } from "./nodes";
 import ParserRuleAdapter, { Rule } from "./ruleAdapter";
@@ -205,9 +206,15 @@ export default class Parser {
                 const targetRuleNode = ruleAdapter.getRuleNode(ruleName);
                 let targetNode = ruleAdapter.getCorrespondingNode(nodeData, targetRuleNode, isBlock, p(ps, pe, this.text));
 
-                // if the target node is a member access node that has "(" as the operator, convert to function call node
-                if (targetNode instanceof MemberAccessNode && targetNode.operator.type == TOKEN_OPAREN) {
-                    targetNode = new FuncCallNode(targetNode.expr, (targetNode.member as FuncArgsNode)).setPos(targetNode.range);
+                if (targetNode instanceof MemberAccessNode) {
+                    // if the target node is a member access node that has "(" as the operator, convert to function call node
+                    if (targetNode.operator.type == TOKEN_OPAREN)
+                        targetNode = new FuncCallNode(targetNode.expr, (targetNode.member as FuncArgsNode)).setPos(targetNode.range);
+                    
+                    else if (targetNode.operator.type == TOKEN_DOT && !ruleAdapter.isIdentifier(targetNode.member)) {
+                        return new SyntaxErrorException(ERROR_MEMACCESSDOT, targetNode.member.range)
+                        break; 
+                    }
                 }
 
                 if (ruleAdapter.doesBlockContainsError(targetNode)) {
