@@ -35,3 +35,9 @@ export function isErr (h: BuiltinOrErr) {
 export function isBlockBreak (h: BuiltinOrErr, type?: BlockBreakType) {
     return h instanceof BlockBreak && (type !== undefined ? h.type == type : true);
 }
+
+export function repeatStr (s: string, n: number) {
+    let ss = '';
+    for (let i = 0; i < n; i++) ss += s;
+    return ss;
+}

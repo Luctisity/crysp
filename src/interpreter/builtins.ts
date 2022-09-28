@@ -4,6 +4,7 @@ import { BaseNode } from "../parser/nodes";
 import { BUILTIN_FUNCTION_ANON, BUILTIN_FUNCTION_NAME, RTERROR_DIV_ZERO } from "../strings";
 import BlockBreak from "./blockBreak";
 import Context from "./context";
+import { repeatStr } from "./util";
 
 export type BuiltinOrErr = Builtin | RuntimeException | BlockBreak;
 
@@ -83,6 +84,13 @@ export class BaseBuiltin {
     }
 
     multiply (what: Builtin): Builtin {
+        // if exactly one of the sides is string, repeat string number of types
+        // otherwise, multiply as numbers
+        if (this instanceof StringBuiltin && !(what instanceof StringBuiltin))
+            return new StringBuiltin(repeatStr(this.value, what.numerify().value)).setContext(this.context);
+        if (what instanceof StringBuiltin && !(this instanceof StringBuiltin))
+            return new StringBuiltin(repeatStr(what.value, this.numerify().value)).setContext(this.context);
+
         return new NumberBuiltin(this.numerify().value * what.numerify().value).setContext(this.context);
     }
 
