@@ -1,7 +1,6 @@
 import { Exception, RuntimeException } from "../classes/exception";
 import {
-    AtomNode, BaseNode, BinaryOpNode, BlockNode, BreakNode, 
-    CasesNode, ContinueNode, DefaultCaseNode, DeleteNode, DoWhileNode,
+    AtomNode, BaseNode, BinaryOpNode, BlockNode, BreakNode, ContinueNode, DeleteNode, DoWhileNode,
     ElseNode, FuncArgsNode, FuncCallNode, FuncDeclareNode, IfNode, RepeatNode, ReturnNode, SwitchNode, ThrowNode, 
     TryCatchNode, UnaryOpNode, VarAssignNode, VarDeclareNode, WhileNode
 } from "../parser/nodes";
