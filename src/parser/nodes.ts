@@ -135,10 +135,10 @@ export class SwitchNode extends BaseNode {
     type = 'switch';
 
     cond:     BaseNode;
-    cases:    BaseNode;
-    defcase?: BaseNode;
+    cases:    CasesNode;
+    defcase?: DefaultCaseNode;
 
-    constructor (_keyword: Token, cond: BaseNode, cases: BaseNode, defcase?: BaseNode) {
+    constructor (_keyword: Token, cond: BaseNode, cases: CasesNode, defcase?: DefaultCaseNode) {
         
         super();
         this.cond    = cond;
@@ -158,8 +158,8 @@ export class SwitchNode extends BaseNode {
 }
 
 export type CasesNodeCase = {
-    cond:   BaseNode,
-    block?: BaseNode
+    cond:  BaseNode,
+    block: BaseNode
 }
 
 export class DefaultCaseNode extends BaseNode {

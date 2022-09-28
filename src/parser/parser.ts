@@ -193,6 +193,8 @@ export default class Parser {
                 // if returned an exception, pass it on
                 if (nodeData instanceof Exception) return nodeData;
 
+                // another hardcoded rule for case, jesus christ
+                if (!nodeData.length && name == 'case') this.prev();
                 if (!nodeData.length && ruleName != 'block') {
                     tryNextVariation();
                     continue;

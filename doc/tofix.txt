@@ -6,7 +6,6 @@ x add an option for variable binary operator length ("*" at the end of a rule va
 x add an option for variable children count node (block nodes)
 x automatic semicolon placement at the end of block statements
 x add error handling
-- generalize multi-child node types (blocks, switch cases, etc.)
 x functions
 - fix allowing empty expressions in block/expr fields (for example after ifs)
 x allow empty blocks 
@@ -16,7 +15,7 @@ x allow empty blocks
 
 x add string types and related operations
 x remake the corresponding node find system
-- switch case
+x switch case
 x fix anonymous functions (they appear as blocks)
 x add support for one line functions without return
 x fix return statements working in one liners not in functions

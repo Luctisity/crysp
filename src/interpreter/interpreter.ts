@@ -191,19 +191,6 @@ export default class Interpreter {
         return this.pass(node.block, context);
     }
 
-    passSwitch = (node: SwitchNode, context: Context) => {
-        const cond         = this.pass(node.cond, context);
-        const childCases   = this.pass(node.cases, context);
-        const childDefcase = node.defcase ? this.pass(node.defcase, context) : null;
-    }
-
-    passDefaultCase = (node: DefaultCaseNode, context: Context) => {
-        const child = this.pass(node.block, context);
-    }
-
-    passCases = (node: CasesNode, context: Context) => {
-        // TODO
-    }
 
     loopIteration = (node: any, loopContext: Context, lastBlock: any) => {
         let b = this.pass(node.block, loopContext);
@@ -225,8 +212,52 @@ export default class Interpreter {
         return loopContext;
     }
 
+
+    passSwitch = (node: SwitchNode, context: Context) => {
+        const cond = this.pass(node.cond, context);
+        if (isErr(cond)) return cond;
+
+        let running = false;
+        let notMatched = true;
+        const loopContext = this.loopContext(node, context);
+        let lastBlock = this.passNothing();
+
+        // loop through every case
+        for (let c of node.cases.cases) {
+            // if already running (no break statement in prev case), evaluate this case too
+            if (running) {
+                lastBlock = this.loopIteration(c, loopContext, lastBlock);
+                if (!lastBlock) {
+                    running = false;
+                    break;
+                }
+            } else {
+                // evaluate the current case condition, if error return
+                const cCond = this.pass(c.cond, context);
+                if (isErr(cCond)) return cCond;
+
+                // if the condition is matched, start running and evaluate current case 
+                if (cCond.equals(cond).value) {
+                    running = true;
+                    notMatched = false;
+                    lastBlock = this.loopIteration(c, loopContext, lastBlock);
+                    if (!lastBlock) {
+                        running = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // if either already running or no other cases were matched, evaluate the default case (if present)
+        if ((running || notMatched) && node.defcase)
+            lastBlock = this.loopIteration(node.defcase, loopContext, lastBlock);
+        
+        return lastBlock || this.passNothing();
+    }
+
     passWhile = (node: WhileNode, context: Context) => {
-        let cond  = this.pass(node.cond, context);
+        let cond = this.pass(node.cond, context);
         if (isErr(cond)) return cond;
 
         const loopContext  = this.loopContext(node, context);
@@ -459,8 +490,6 @@ export default class Interpreter {
         'if':          this.passIf,
         'else':        this.passElse,
         'switch':      this.passSwitch,
-        'defaultCase': this.passDefaultCase,
-        'cases':       this.passCases,
 
         'while':       this.passWhile,
         'dowhile':     this.passDoWhile,
