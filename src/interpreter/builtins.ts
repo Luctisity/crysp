@@ -72,6 +72,13 @@ export class BaseBuiltin {
     }
 
     subtract (what: Builtin): Builtin {
+        // if exactly one of the sides is string, subtract number from the string's length
+        // otherwise, multiply as numbers
+        if (this instanceof StringBuiltin && !(what instanceof StringBuiltin))
+            return new StringBuiltin(
+                this.value.slice(0, -Math.round(what.numerify().value) || this.value.length)
+            ).setContext(this.context);
+
         return new NumberBuiltin(this.numerify().value - what.numerify().value).setContext(this.context);
     }
 
@@ -84,7 +91,7 @@ export class BaseBuiltin {
     }
 
     multiply (what: Builtin): Builtin {
-        // if exactly one of the sides is string, repeat string number of types
+        // if exactly one of the sides is string, repeat string number of times
         // otherwise, multiply as numbers
         if (this instanceof StringBuiltin && !(what instanceof StringBuiltin))
             return new StringBuiltin(repeatStr(this.value, what.numerify().value)).setContext(this.context);
@@ -97,6 +104,14 @@ export class BaseBuiltin {
     divide (what: Builtin): BuiltinOrErr {
         let divider = what.numerify().value;
         if (divider === 0) return new RuntimeException(RTERROR_DIV_ZERO, this.range, this.context);
+
+        // if exactly one of the sides is string, divide string's length by number
+        // otherwise, multiply as numbers
+        if (this instanceof StringBuiltin && !(what instanceof StringBuiltin))
+            return new StringBuiltin(
+                this.value.slice(0, Math.round(this.value.length / divider))
+            ).setContext(this.context);
+
         return new NumberBuiltin(this.numerify().value / divider).setContext(this.context);
     }
 

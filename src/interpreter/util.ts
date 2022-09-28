@@ -37,6 +37,14 @@ export function isBlockBreak (h: BuiltinOrErr, type?: BlockBreakType) {
 }
 
 export function repeatStr (s: string, n: number) {
+    // if the n is below 0, reverse the string and invert n to be positive
+    if (n < 0) {
+        n = -n;
+        s = [...s].reverse().join("")
+    }
+
+    n = Math.round(n);
+
     let ss = '';
     for (let i = 0; i < n; i++) ss += s;
     return ss;
