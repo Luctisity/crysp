@@ -4,7 +4,7 @@ import {
     getStringEscapeCode, hasSymbolsStartWith, isComment, isCommentEnd, isDot, 
     isExp, isFloatNumeric, isFloatNumericExp, isKeyword, 
     isStringQuote, isSymbol, isWhitespace, isWord 
-} from "../util";
+} from "./util";
 import { 
     COMMENT_NEWLINE, NUMERIC_DOT, NUMERIC_EXP, SYMBOLS, TOKEN_FLOAT, 
     TOKEN_IDENTIFIER, TOKEN_INT, TOKEN_KEYWORD, TOKEN_STRING 

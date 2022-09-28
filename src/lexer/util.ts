@@ -1,4 +1,4 @@
-import { COMMENT_END, COMMENT_START, KEYWORDS, NUMERIC, NUMERIC_DOT, NUMERIC_EXP, STRING, STRING_ESCAPE_CODES, SYMBOLS, WORD } from "./lexer/constants";
+import { COMMENT_END, COMMENT_START, KEYWORDS, NUMERIC, NUMERIC_DOT, NUMERIC_EXP, STRING, STRING_ESCAPE_CODES, SYMBOLS, WORD } from "./constants";
 
 export function isWhitespace (char: string) {
     return char.trim() != char;
