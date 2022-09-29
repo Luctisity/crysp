@@ -2,9 +2,9 @@ import { Exception, SyntaxErrorException } from "../classes/exception";
 import { p } from "../classes/position";
 import { TOKEN_BLOCKSEP, TOKEN_CBRACK, TOKEN_CPAREN, TOKEN_DOT, TOKEN_NEWL, TOKEN_OBRACK, TOKEN_OPAREN } from "../lexer/constants";
 import Token from "../lexer/token";
-import { ERROR_MEMACCESSDOT, ERROR_UNEXP_TOKEN } from "../strings";
+import { ERROR_INVALIDASSIGN, ERROR_MEMACCESSDOT } from "../strings";
 import grammarRules from "./grammarRules.json";
-import { FuncArgsNode, FuncCallNode, MemberAccessNode } from "./nodes";
+import { FuncArgsNode, FuncCallNode, MemberAccessNode, MemberAssignNode } from "./nodes";
 import ParserRuleAdapter, { Rule } from "./ruleAdapter";
 
 export type ParserCurrentState = {
@@ -214,7 +214,7 @@ export default class Parser {
                         targetNode = new FuncCallNode(targetNode.expr, (targetNode.member as FuncArgsNode)).setPos(targetNode.range);
                     
                     // if the expression after the "." is not an identifier, throw error
-                    else if (targetNode.operator.type == TOKEN_DOT && !ruleAdapter.isIdentifier(targetNode.member)) {
+                    else if (targetNode.operator.type == TOKEN_DOT && targetNode.closeTok) {
                         return new SyntaxErrorException(ERROR_MEMACCESSDOT, targetNode.member.range)
                     }
 
@@ -227,6 +227,12 @@ export default class Parser {
                         if (!closeTok?.type || ![TOKEN_CBRACK, TOKEN_CPAREN].includes(closeTok.type)) this.next();
                         break;
                     }
+                }
+
+                // if member assign node is not assigning to a member, throw an error
+                if (targetNode instanceof MemberAssignNode) {
+                    if (!(targetNode.member instanceof MemberAccessNode))
+                        return new SyntaxErrorException(ERROR_INVALIDASSIGN, targetNode.member.range)
                 }
 
                 if (ruleAdapter.doesBlockContainsError(targetNode)) {

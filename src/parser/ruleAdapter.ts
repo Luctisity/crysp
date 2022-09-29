@@ -1,9 +1,9 @@
 import { SyntaxErrorException } from "../classes/exception";
 import { PositionRange } from "../classes/position";
-import { ATOMS, SYMBOLS, TOKEN_CPAREN, TOKEN_FLOAT, TOKEN_IDENTIFIER, TOKEN_INT, TOKEN_KEYWORD, TOKEN_OPAREN, TOKEN_STRING } from "../lexer/constants";
+import { ATOMS, SYMBOLS, TOKEN_CPAREN, TOKEN_DECR, TOKEN_FLOAT, TOKEN_IDENTIFIER, TOKEN_INCR, TOKEN_INT, TOKEN_KEYWORD, TOKEN_OPAREN, TOKEN_STRING } from "../lexer/constants";
 import Token from "../lexer/token";
 import { ERROR_UNEXP_TOKEN, h } from "../strings";
-import { AtomNode, BlockNode, BreakNode, CasesNode, ContinueNode, FuncCallNode, NODES, NODE_INPUT_NODES, ReturnNode } from "./nodes";
+import { AtomNode, BlockNode, BreakNode, CasesNode, ContinueNode, FuncCallNode, NODES, NODE_INPUT_NODES, NODE_INPUT_REQUIRED, ReturnNode } from "./nodes";
 import grammarRules from "./grammarRules.json";
 
 export type Rule = string[][];
@@ -167,6 +167,14 @@ export default class ParserRuleAdapter {
                 if (error) return;
                 if (targetNode[nodeName] && targetNode[nodeName] instanceof Token) error = true;
             });
+
+            const targetNodeRequired = NODE_INPUT_REQUIRED[targetNode.type];
+            if (targetNodeRequired) {
+                targetNodeRequired.forEach((nodeName: string) => {
+                    if (error) return;
+                    if (!targetNode[nodeName] && ![TOKEN_INCR, TOKEN_DECR].includes(targetNode.operator?.type)) error = true;
+                });
+            }
         }
 
         return error;

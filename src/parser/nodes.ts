@@ -359,6 +359,27 @@ export class VarAssignNode extends BaseNode {
 
 }
 
+export class MemberAssignNode extends BaseNode {
+
+    type = 'memberAssign';
+
+    member:   BaseNode;
+    operator: Token;
+    expr?:    BaseNode;
+
+    constructor (member: BaseNode, operator: Token, expr?: BaseNode) {
+        super();
+        this.member   = member;
+        this.operator = operator;
+        this.expr     = expr;
+    }
+
+    toString () {
+        return `[MEM ${this.member} ${this.operator} ${this.expr}]`;
+    }
+
+}
+
 export class FuncDeclareNode extends BaseNode {
 
     type = 'funcDeclare';
@@ -529,6 +550,7 @@ export const NODES: any = {
 
     'varDeclare':   VarDeclareNode,
     'varAssign':    VarAssignNode,
+    'memberAssign': MemberAssignNode,
     'funcDeclare':  FuncDeclareNode,
     'anonymousFuncDeclare': AnonymousFuncDeclareNode,
     'funcCall':     FuncCallNode,
@@ -545,3 +567,10 @@ export const NODE_INPUT_NODES = [
     'left', 'right', 'node', 'condIf', 'thenIf', 'thenElse', 
     'block', 'cond', 'cases', 'defcase', 'tryBlock', 'catchBlock', 'expr'
 ]
+
+export const NODE_INPUT_REQUIRED: any = {
+    'binaryOp':  ['left', 'right'], 
+    'unaryOp':   ['node'],
+    'varAssign': ['expr'],
+    'memberAssign': ['expr']
+}

@@ -101,6 +101,20 @@
         "varAssign"
     ],
 
+    "memberAssign": [
+        ["$member", "@ASSIGN", "$expr"],
+        ["$member", "@ADDTO", "$expr"],
+        ["$member", "@SUBFROM", "$expr"],
+        ["$member", "@MULBY", "$expr"],
+        ["$member", "@DIVBY", "$expr"],
+        ["$member", "@POWERBY", "$expr"],
+        ["$member", "@MODBY", "$expr"],
+        ["$member", "@INCR"],
+        ["$member", "@DECR"],
+        ["$member"],
+        "memberAssign"
+    ],
+
     "funcDeclare": [
         ["@KEYWORD:func", "@IDENTIFIER", "@OPAREN&", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
         ["@KEYWORD:func", "@IDENTIFIER", "@OPAREN&", "$funcDeclareParams", "@CPAREN&", "@OCURLY&", "$block", "@CCURLY&"],
@@ -175,8 +189,8 @@
         "unaryOp"
     ],
     "power": [
-        ["$member", "@POW", "$factor", "*"],
-        ["$member"],
+        ["$memberAssign", "@POW", "$factor", "*"],
+        ["$memberAssign"],
         "binaryOp"
     ],
 
