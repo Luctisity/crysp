@@ -568,9 +568,20 @@ export const NODE_INPUT_NODES = [
     'block', 'cond', 'cases', 'defcase', 'tryBlock', 'catchBlock', 'expr'
 ]
 
+
+// this is extremely messy, idk why doesnt it work according to the grammar rules
+// but this needs to be fixed and removed ASAP
 export const NODE_INPUT_REQUIRED: any = {
     'binaryOp':  ['left', 'right'], 
     'unaryOp':   ['node'],
     'varAssign': ['expr'],
-    'memberAssign': ['expr']
+    'memberAssign': ['expr'],
+    'if': ['thenIf'],
+    'else': ['block'],
+    'switch': ['cases'],
+    'while': ['block'],
+    'dowhile': ['block'],
+    'repeat': ['block'],
+    'funcDeclare': ['expr'],
+    'anonymousFuncDeclare': ['expr']
 }

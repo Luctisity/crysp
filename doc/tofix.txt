@@ -7,10 +7,10 @@ x add an option for variable children count node (block nodes)
 x automatic semicolon placement at the end of block statements
 x add error handling
 x functions
-- fix allowing empty expressions in block/expr fields (for example after ifs)
+x fix allowing empty expressions in block/expr fields (for example after ifs)
 x allow empty blocks 
 x add an option to call expressions as functions (example: myFunc()(), (myFunc())(), etc.)
-- add support for setting members (MemberSetNode)
+x add support for setting members (MemberAssignNode)
 - consts and enums
 - dictionary and array literals
 
@@ -22,5 +22,5 @@ x switch case
 x fix anonymous functions (they appear as blocks)
 x add support for one line functions without return
 x fix return statements working in one liners not in functions
-- add support for setting members (passMemberSet)
+- add support for setting members (passMemberAssign)
 - add dictionary builtins
