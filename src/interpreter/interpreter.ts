@@ -1,12 +1,13 @@
 import { Exception, RuntimeException } from "../classes/exception";
+import Token from "../lexer/token";
 import {
     AtomNode, BaseNode, BinaryOpNode, BlockNode, BreakNode, ContinueNode, DeleteNode, DoWhileNode,
-    ElseNode, FuncArgsNode, FuncCallNode, FuncDeclareNode, IfNode, MemberAccessNode, RepeatNode, ReturnNode, SwitchNode, ThrowNode, 
+    ElseNode, FuncArgsNode, FuncCallNode, FuncDeclareNode, IfNode, MemberAccessNode, MemberAssignNode, RepeatNode, ReturnNode, SwitchNode, ThrowNode, 
     TryCatchNode, UnaryOpNode, VarAssignNode, VarDeclareNode, WhileNode
 } from "../parser/nodes";
-import { h, RTERROR_ALREADY_DECLARED, RTERROR_ILLEGAL_BLOCK_BREAK, RTERROR_NOT_A_FUNC, RTERROR_NOT_DEFINED, RTERROR_NOT_ENOUGH_ARGS } from "../strings";
+import { h, RTERROR_ALREADY_DECLARED, RTERROR_ILLEGAL_BLOCK_BREAK, RTERROR_NOT_A_FUNC, RTERROR_NOT_DEFINED, RTERROR_NOT_ENOUGH_ARGS, RTERROR_READ_PROPS_NULL } from "../strings";
 import BlockBreak, { BlockBreakType } from "./blockBreak";
-import { BaseBuiltin, BooleanBuiltin, BuiltinOrErr, FuncBuiltin, NullBuiltin, NumberBuiltin, StringBuiltin } from "./builtins";
+import { BaseBuiltin, BooleanBuiltin, BuiltinOrErr, DictionaryBuiltin, FuncBuiltin, NullBuiltin, NumberBuiltin, StringBuiltin } from "./builtins";
 import Context from "./context";
 import { getBooleanValue, isBlockBreak, isBoolean, isErr, isNumber, isString, isVariable, matchKeyword } from "./util";
 import VarStore from "./varStore";
@@ -65,7 +66,7 @@ export default class Interpreter {
     constructor (text?: string) {
         this.text = text;
 
-        this.globalVarStore.set("Waltuh", new NumberBuiltin(69));
+        this.globalVarStore.set("Waltuh", new DictionaryBuiltin());
     }
 
     passAtom = (node: AtomNode, context: Context) => {
@@ -370,6 +371,21 @@ export default class Interpreter {
         return value.setPos(node.range);
     }
 
+    assignOperation = (node: any, currentValue: any, context: Context) => {
+        // get the corresponding method for the assignment operation
+        // if not found, return null
+        const method = ASSIGNOP_MAP[node.operator.type] || matchKeyword(ASSIGNOP_MAP, node.operator);
+        if (!method || !currentValue[method]) return this.passNothing();
+
+        // get the assignment value
+        const assignValue = node.expr ? this.pass(node.expr, context) : null;
+        if (assignValue && isErr(assignValue)) return assignValue;
+
+        // calculate the resulting value by calling the correct method
+        let value = currentValue[method](assignValue);
+        return value;
+    }
+
     passVarAssign = (node: VarAssignNode, context: Context) => {
         const name = node.name.value;
         if (!context.varStore?.get(name)) 
@@ -378,21 +394,33 @@ export default class Interpreter {
         // get current var value
         const currentValue = context.varStore.get(name);
 
-        // get the corresponding method for the assignment operation
-        // if not found, return null
-        const method = ASSIGNOP_MAP[node.operator.type] || matchKeyword(ASSIGNOP_MAP, node.operator);
-        if (!method || !(currentValue as any)[method]) return this.passNothing();
-
-        // get the assignment value
-        const assignValue = node.expr ? this.pass(node.expr, context) : null;
-        if (assignValue && isErr(assignValue)) return assignValue;
-
         // calculate the resulting value by calling the correct method
-        let value = (currentValue as any)[method](assignValue);
+        const value = this.assignOperation(node, currentValue, context);
         if (isErr(value)) return value;
 
         // update the variable
         context.varStore.update(name, value);
+        return value.setPos(node.range);
+    }
+
+    passMemberAssign = (node: MemberAssignNode, context: Context) => {
+        // get the member name, if error return
+        const memberVal = (node.member as MemberAccessNode).member instanceof BaseNode 
+            ? this.pass((node.member as MemberAccessNode).member as BaseNode, context)
+            : (node.member as MemberAccessNode).member as Token;
+        if (isErr(memberVal)) return memberVal;
+
+        const member: any = this.pass(node.member, context);
+        if (isErr(member)) {
+           (member as RuntimeException).details = (member as RuntimeException).details!.replace('read', 'write');
+           return member;
+        }
+
+        const currentValue = member;
+        const value = this.assignOperation(node, currentValue, context);
+        if (isErr(value)) return value;
+
+        member.parent.setMember(memberVal, value);
         return value.setPos(node.range);
     }
 
@@ -411,7 +439,6 @@ export default class Interpreter {
 
     passFuncCall = (node: FuncCallNode, context: Context) => {
         const value: FuncBuiltin = this.pass(node.expr, context) as FuncBuiltin;
-        console.log(value);
         if (isErr(value)) return value;
 
         // if the var is not defined or is not a function, throw error
@@ -521,6 +548,7 @@ export default class Interpreter {
 
         'varDeclare':   this.passVarDeclare,
         'varAssign':    this.passVarAssign,
+        'memberAssign': this.passMemberAssign,
         'funcDeclare':  this.passFuncDeclare,
         'anonymousFuncDeclare': this.passFuncDeclare,
         'funcCall':     this.passFuncCall,

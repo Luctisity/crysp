@@ -2,12 +2,13 @@ import { RuntimeException } from "../classes/exception";
 import { PositionRange } from "../classes/position";
 import Token from "../lexer/token";
 import { BaseNode } from "../parser/nodes";
-import { BUILTIN_FUNCTION_ANON, BUILTIN_FUNCTION_NAME, h, RTERROR_DIV_ZERO, RTERROR_READ_PROPS_NULL } from "../strings";
+import { BUILTIN_VALUE_ANON, BUILTIN_FUNCTION_NAME, h, RTERROR_DIV_ZERO, RTERROR_READ_PROPS_NULL, BUILTIN_DICTIONARY_NAME } from "../strings";
 import BlockBreak from "./blockBreak";
 import Context from "./context";
 import { builtinOrToken, repeatStr } from "./util";
 
 export type BuiltinOrErr = Builtin | RuntimeException | BlockBreak;
+export type DictionaryBuiltinValue = { [key: string]: BaseBuiltin }
 
 interface Builtin {
 
@@ -26,6 +27,7 @@ interface Builtin {
     modulo    (what: Builtin): Builtin;
 
     member    (what: Builtin|Token): BuiltinOrErr;
+    setMember (what: Builtin|Token, value: Builtin): BuiltinOrErr
 
     equals    (what: Builtin): Builtin;
     notEquals (what: Builtin): Builtin;
@@ -48,10 +50,11 @@ interface Builtin {
 export class BaseBuiltin {
 
     value:    any;
-    name   =  "";
+    name   =  BUILTIN_VALUE_ANON;
     isFunc =  false;
     range?:   PositionRange;
     context?: Context;
+    parent?:  BaseBuiltin;
 
     setPos (range?: PositionRange) {
         this.range = range;
@@ -60,6 +63,11 @@ export class BaseBuiltin {
 
     setContext (context?: Context) {
         this.context = context;
+        return this;
+    }
+
+    setParent (parent?: BaseBuiltin) {
+        this.parent = parent;
         return this;
     }
 
@@ -129,7 +137,11 @@ export class BaseBuiltin {
     }
 
     member (_what: Builtin|Token): BuiltinOrErr {
-        return new NullBuiltin();
+        return new NullBuiltin().setParent(this);
+    }
+
+    setMember (_what: Builtin|Token, _value: Builtin): BuiltinOrErr {
+        return new NullBuiltin().setParent(this);
     }
 
     equals (what: Builtin): Builtin {
@@ -294,7 +306,7 @@ export class FuncBuiltin extends BaseBuiltin implements Builtin {
     constructor (value: BaseNode, name?: string, params?: string[], oneLiner: boolean = false) {
         super();
         this.value = value;
-        this.name  = name || BUILTIN_FUNCTION_ANON;
+        this.name  = name || BUILTIN_VALUE_ANON;
         this.params = params || this.params;
         this.oneLiner = oneLiner;
     }
@@ -309,6 +321,40 @@ export class FuncBuiltin extends BaseBuiltin implements Builtin {
 
     castStr (): StringBuiltin {
         return new StringBuiltin(`[${BUILTIN_FUNCTION_NAME}:${this.name}]`);
+    }
+
+}
+
+export class DictionaryBuiltin extends BaseBuiltin implements Builtin {
+
+    value: DictionaryBuiltinValue = Object.create(null);
+
+    constructor (value?: DictionaryBuiltinValue) {
+        super();
+        this.value = value || this.value;
+    }
+
+    member (what: Builtin|Token): BuiltinOrErr {
+        const keyStr = (what instanceof Token) ? what.value.toString() : what.castStr();
+        return this.value[keyStr] || new NullBuiltin().setParent(this);
+    }
+
+    setMember (what: Builtin|Token, value: BaseBuiltin): BuiltinOrErr {
+        const keyStr = (what instanceof Token) ? what.value.toString() : what.castStr();
+        this.value[keyStr] = value.setParent(this);
+        return value;
+    }
+
+    numerify (): NumberBuiltin {
+        return new NumberBuiltin(1).setContext(this.context);
+    }
+
+    castBool (): BooleanBuiltin {
+        return new BooleanBuiltin(true).setContext(this.context);
+    }
+
+    castStr (): StringBuiltin {
+        return new StringBuiltin(`[${BUILTIN_DICTIONARY_NAME}:${this.name}]`);
     }
 
 }
