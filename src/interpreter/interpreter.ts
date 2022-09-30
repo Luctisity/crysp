@@ -403,11 +403,17 @@ export default class Interpreter {
         return value.setPos(node.range);
     }
 
+    memberVal = (node: any, context: Context) => {
+        if (!node || !node.member) return;
+        return node.member instanceof BaseNode 
+            ? this.pass(node.member as BaseNode, context)
+            : node.member as Token;
+    }
+
     passMemberAssign = (node: MemberAssignNode, context: Context) => {
         // get the member name, if error return
-        const memberVal = (node.member as MemberAccessNode).member instanceof BaseNode 
-            ? this.pass((node.member as MemberAccessNode).member as BaseNode, context)
-            : (node.member as MemberAccessNode).member as Token;
+        const memberVal = this.memberVal(node.member, context);
+        if (!memberVal)       return this.passNothing();
         if (isErr(memberVal)) return memberVal;
 
         const member: any = this.pass(node.member, context);
@@ -515,7 +521,13 @@ export default class Interpreter {
     }
 
     passDelete = (node: DeleteNode, context: Context) => {
-        const child = node.expr ? this.pass(node.expr, context) : null;
+        const memberVal = this.memberVal(node.expr, context);
+        if (!memberVal)       return this.passNothing();
+        if (isErr(memberVal)) return memberVal;
+
+        const child = this.pass(node.expr, context);
+        if (child.parent) child.parent.deleteMember(memberVal);
+        return this.passNothing();
     }
 
     passThrow = (node: ThrowNode, context: Context) => {

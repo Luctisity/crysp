@@ -27,7 +27,8 @@ interface Builtin {
     modulo    (what: Builtin): Builtin;
 
     member    (what: Builtin|Token): BuiltinOrErr;
-    setMember (what: Builtin|Token, value: Builtin): BuiltinOrErr
+    setMember (what: Builtin|Token, value: Builtin): BuiltinOrErr;
+    deleteMember (_what: Builtin|Token): void;
 
     equals    (what: Builtin): Builtin;
     notEquals (what: Builtin): Builtin;
@@ -143,6 +144,8 @@ export class BaseBuiltin {
     setMember (_what: Builtin|Token, _value: Builtin): BuiltinOrErr {
         return new NullBuiltin().setParent(this);
     }
+
+    deleteMember (_what: Builtin|Token): void {}
 
     equals (what: Builtin): Builtin {
         // strict equality!!!
@@ -343,6 +346,11 @@ export class DictionaryBuiltin extends BaseBuiltin implements Builtin {
         const keyStr = (what instanceof Token) ? what.value.toString() : what.castStr();
         this.value[keyStr] = value.setParent(this);
         return value;
+    }
+
+    deleteMember (what: Builtin|Token): void {
+        const keyStr = (what instanceof Token) ? what.value.toString() : what.castStr();
+        delete this.value[keyStr];
     }
 
     numerify (): NumberBuiltin {
